@@ -17,6 +17,7 @@ Stand up a four-node Raspberry Pi k3s cluster with three HA control-plane member
 **Testing**: `ansible-playbook --check`, `ansible-lint`, `kubectl diff`, manual HA failover drills, shell smoke tests for node health  
 **Target Platform**: Raspberry Pi 4 Model B (8GB RAM) running 64-bit Raspberry Pi OS Lite with cgroups v2 enabled  
 **Project Type**: Infrastructure-as-code repository (Ansible playbooks + Kubernetes manifests)  
+**Tooling**: `uv`-managed Python virtual environment for Ansible tooling and linters  
 **Performance Goals**: Node rebuild ≤60 minutes, alert delivery ≤5 minutes for critical events, maintain 95% drift-free deployment rate, cluster services stable under home-lab loads  
 **Constraints**: ARM64-only workloads, limited IO throughput on SD/SSD media, residential power/network variability, manual manifest application workflow  
 **Scale/Scope**: Four-node HA test bed (3 control-plane server+agent, 1 worker); roadmap accommodates growth to ≤10 nodes with documented deviations
@@ -95,10 +96,11 @@ tests/
 
 1. Translate Cluster Node Profile, Configuration Change Record, and Provisioning Run entities into `data-model.md` with fields, validation, and relationships.
 2. Define operational contract (OpenAPI) for recording manual actions: bootstrap, rebuild, diff submission, alert acknowledgement.
-3. Draft `quickstart.md` covering workstation setup (kubectl, helm, ansible), secrets bootstrapping, and first cluster bootstrap walkthrough.
-4. Generate baseline Kubernetes manifest layout (directories, naming conventions) and map to automation roles.
-5. Update agent context via `.specify/scripts/bash/update-agent-context.sh codex` with new technologies (Ansible roles, SOPS-age workflow, kube-prometheus-stack).
-6. Re-run Constitution Check ensuring design artifacts demonstrate compliance; document outcomes in plan.
+3. Define `uv` project configuration (`pyproject.toml` or `uv.lock`) documenting Python dependencies and virtual environment workflow.
+4. Draft `quickstart.md` covering workstation setup (kubectl, helm, uv-based Ansible env), secrets bootstrapping, and first cluster bootstrap walkthrough.
+5. Generate baseline Kubernetes manifest layout (directories, naming conventions) and map to automation roles.
+6. Update agent context via `.specify/scripts/bash/update-agent-context.sh codex` with new technologies (Ansible roles, SOPS-age workflow, kube-prometheus-stack).
+7. Re-run Constitution Check ensuring design artifacts demonstrate compliance; document outcomes in plan.
 
 ## Phase 2: Implementation Preparation (Stop Point)
 

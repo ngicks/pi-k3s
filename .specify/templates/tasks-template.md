@@ -8,7 +8,7 @@ description: "Task list template for feature implementation"
 **Input**: Design documents from `/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: Use CI dry-runs (`kubectl diff`, `ansible-playbook --check`) and lightweight shell tests. Include them only if explicitly requested in the feature specification.
+**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -20,12 +20,10 @@ description: "Task list template for feature implementation"
 
 ## Path Conventions
 
-- `automation/ansible/`: Provisioning and configuration playbooks.
-- `automation/scripts/`: Shell helpers invoked manually or via CI.
-- `cluster/base/`: Shared manifests (namespaces, ingress, monitoring).
-- `cluster/apps/<service>/`: Workload-specific overlays.
-- `docs/runbooks/`: Operational documentation to update with every change.
-- `tests/automation/` & `tests/k8s-diff/`: Idempotence checks and manifest diff assertions.
+- **Single project**: `src/`, `tests/` at repository root
+- **Web app**: `backend/src/`, `frontend/src/`
+- **Mobile**: `api/src/`, `ios/src/` or `android/src/`
+- Paths shown below assume single project - adjust based on plan.md structure
 
 <!-- 
   ============================================================================
@@ -46,55 +44,62 @@ description: "Task list template for feature implementation"
   ============================================================================
 -->
 
-## Phase 1: GitOps & Documentation Foundations
+## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Prepare repository artifacts required before touching workloads.
+**Purpose**: Project initialization and basic structure
 
-- [ ] T001 Update `cluster/base/` manifests and run `kubectl diff` in CI.
-- [ ] T002 Refresh `docs/runbooks/<topic>.md` with planned operational changes.
-- [ ] T003 [P] Capture compliance notes in `docs/governance/reviews/`.
-
----
-
-## Phase 2: Provisioning & Node Health Prerequisites
-
-**Purpose**: Ensure automation can rebuild hardware and stays idempotent.
-
-- [ ] T004 Update `automation/ansible/<playbook>.yml` for new capability.
-- [ ] T005 [P] Run `ansible-playbook --check` (record logs in PR).
-- [ ] T006 [P] Add smoke tests under `tests/automation/` verifying reruns converge.
-- [ ] T007 Document hardware assumptions in `docs/runbooks/hardware.md`.
-
-**Checkpoint**: Provisioning automation validated; workload changes can proceed.
+- [ ] T001 Create project structure per implementation plan
+- [ ] T002 Initialize [language] project with [framework] dependencies
+- [ ] T003 [P] Configure linting and formatting tools
 
 ---
 
-## Phase 3: Service Workload - [Title] (Priority: P1) 🎯 MVP
+## Phase 2: Foundational (Blocking Prerequisites)
 
-**Goal**: [Brief description of workload or platform capability delivered]
+**Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
+
+**⚠️ CRITICAL**: No user story work can begin until this phase is complete
+
+Examples of foundational tasks (adjust based on your project):
+
+- [ ] T004 Setup database schema and migrations framework
+- [ ] T005 [P] Implement authentication/authorization framework
+- [ ] T006 [P] Setup API routing and middleware structure
+- [ ] T007 Create base models/entities that all stories depend on
+- [ ] T008 Configure error handling and logging infrastructure
+- [ ] T009 Setup environment configuration management
+
+**Checkpoint**: Foundation ready - user story implementation can now begin in parallel
+
+---
+
+## Phase 3: User Story 1 - [Title] (Priority: P1) 🎯 MVP
+
+**Goal**: [Brief description of what this story delivers]
 
 **Independent Test**: [How to verify this story works on its own]
 
 ### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
 
-> **NOTE: Capture `kubectl diff`/`helm template` output before applying**
+> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T010 [P] [US1] Add manifest diff assertion in `tests/k8s-diff/test_[name].sh`.
-- [ ] T011 [P] [US1] Validate alert coverage with monitoring rule test.
+- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
+- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Update `cluster/apps/<service>/kustomization.yaml`.
-- [ ] T013 [P] [US1] Define RBAC/secret changes under `cluster/policies/`.
-- [ ] T014 [US1] Provide runbook updates in `docs/runbooks/<service>.md`.
-- [ ] T015 [US1] Update GitOps controller sync configuration if needed.
-- [ ] T016 [US1] Record observability changes in spec/tasks for reviewer sign-off.
+- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
+- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
+- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
+- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T016 [US1] Add validation and error handling
+- [ ] T017 [US1] Add logging for user story 1 operations
 
-**Checkpoint**: Workload deployed via GitOps with validated health/alerts.
+**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
 ---
 
-## Phase 4: Service Workload 2 - [Title] (Priority: P2)
+## Phase 4: User Story 2 - [Title] (Priority: P2)
 
 **Goal**: [Brief description of what this story delivers]
 
@@ -102,24 +107,38 @@ description: "Task list template for feature implementation"
 
 ### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
 
-- [ ] T018 [P] [US2] Update diff/assertions for secondary workload.
-- [ ] T019 [P] [US2] Add alert validation for new metrics.
+- [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
+- [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
 
 ### Implementation for User Story 2
 
-- [ ] T020 [P] [US2] Adjust overlays in `cluster/apps/<service2>/`.
-- [ ] T021 [US2] Update sealed secrets or encrypted manifests.
-- [ ] T022 [US2] Extend runbook coverage and cross-reference dependencies.
+- [ ] T020 [P] [US2] Create [Entity] model in src/models/[entity].py
+- [ ] T021 [US2] Implement [Service] in src/services/[service].py
+- [ ] T022 [US2] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T023 [US2] Integrate with User Story 1 components (if needed)
 
-**Checkpoint**: Workload 1 and 2 independently deliver value with GitOps audit trail.
+**Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
 ---
 
-## Phase 5: Service Workload 3 - [Title] (Priority: P3)
+## Phase 5: User Story 3 - [Title] (Priority: P3)
 
 **Goal**: [Brief description of what this story delivers]
 
 **Independent Test**: [How to verify this story works on its own]
+
+### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
+
+- [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
+- [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
+
+### Implementation for User Story 3
+
+- [ ] T026 [P] [US3] Create [Entity] model in src/models/[entity].py
+- [ ] T027 [US3] Implement [Service] in src/services/[service].py
+- [ ] T028 [US3] Implement [endpoint/feature] in src/[location]/[file].py
+
+**Checkpoint**: All user stories should now be independently functional
 
 ---
 
@@ -129,12 +148,14 @@ description: "Task list template for feature implementation"
 
 ## Phase N: Polish & Cross-Cutting Concerns
 
-**Purpose**: Harden operations and complete compliance steps.
+**Purpose**: Improvements that affect multiple user stories
 
-- [ ] TXXX [P] Rotate credentials/secrets touched by this feature.
-- [ ] TXXX Confirm CI pipelines and GitOps sync intervals still succeed.
-- [ ] TXXX Update governance review notes with compliance evidence.
-- [ ] TXXX Execute runbook validation from `docs/quickstart.md`.
+- [ ] TXXX [P] Documentation updates in docs/
+- [ ] TXXX Code cleanup and refactoring
+- [ ] TXXX Performance optimization across all stories
+- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
+- [ ] TXXX Security hardening
+- [ ] TXXX Run quickstart.md validation
 
 ---
 
@@ -142,33 +163,34 @@ description: "Task list template for feature implementation"
 
 ### Phase Dependencies
 
-- **GitOps & Documentation (Phase 1)**: No dependencies - can start immediately
-- **Provisioning & Node Health (Phase 2)**: Depends on Phase 1 completion - BLOCKS all user stories
-- **Service Workloads (Phase 3+)**: All depend on Phase 2 completion
+- **Setup (Phase 1)**: No dependencies - can start immediately
+- **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories
+- **User Stories (Phase 3+)**: All depend on Foundational phase completion
   - User stories can then proceed in parallel (if staffed)
   - Or sequentially in priority order (P1 → P2 → P3)
 - **Polish (Final Phase)**: Depends on all desired user stories being complete
 
 ### User Story Dependencies
 
-- **User Story 1 (P1)**: Can start after Phase 2 completes; no dependency on other stories.
-- **User Story 2 (P2)**: Can start after Phase 2; may integrate with US1 but must stay independently testable.
-- **User Story 3 (P3)**: Can start after Phase 2; may integrate with US1/US2 but must stay independently testable.
+- **User Story 1 (P1)**: Can start after Foundational (Phase 2) - No dependencies on other stories
+- **User Story 2 (P2)**: Can start after Foundational (Phase 2) - May integrate with US1 but should be independently testable
+- **User Story 3 (P3)**: Can start after Foundational (Phase 2) - May integrate with US1/US2 but should be independently testable
 
 ### Within Each User Story
 
-- Diff/dry-run evidence MUST exist before applying manifests.
-- Secrets and RBAC updates MUST be merged only after reviewers confirm scope.
-- Runbook documentation MUST be drafted alongside manifest changes.
-- Monitoring/alert updates MUST be validated before declaring the story complete.
+- Tests (if included) MUST be written and FAIL before implementation
+- Models before services
+- Services before endpoints
+- Core implementation before integration
+- Story complete before moving to next priority
 
 ### Parallel Opportunities
 
-- All Phase 1 tasks marked [P] can run in parallel (docs, base manifests, governance notes)
-- All Phase 2 tasks marked [P] can run in parallel (idempotence checks per playbook)
+- All Setup tasks marked [P] can run in parallel
+- All Foundational tasks marked [P] can run in parallel (within Phase 2)
 - Once Foundational phase completes, all user stories can start in parallel (if team capacity allows)
 - All tests for a user story marked [P] can run in parallel
-- Manifests/overlays within a story marked [P] can run in parallel when touching separate services
+- Models within a story marked [P] can run in parallel
 - Different user stories can be worked on in parallel by different team members
 
 ---
@@ -176,13 +198,13 @@ description: "Task list template for feature implementation"
 ## Parallel Example: User Story 1
 
 ```bash
-# Launch dry-run checks for User Story 1 together (if requested):
-Task: "Run kubectl diff for cluster/apps/<service>"
-Task: "Run ansible-playbook --check for automation/ansible/<playbook>.yml"
+# Launch all tests for User Story 1 together (if tests requested):
+Task: "Contract test for [endpoint] in tests/contract/test_[name].py"
+Task: "Integration test for [user journey] in tests/integration/test_[name].py"
 
-# Launch all observability updates for User Story 1 together:
-Task: "Validate alert rules in tests/k8s-diff/test_alerts.sh"
-Task: "Update logging dashboards in cluster/apps/<service>/monitoring.yaml"
+# Launch all models for User Story 1 together:
+Task: "Create [Entity1] model in src/models/[entity1].py"
+Task: "Create [Entity2] model in src/models/[entity2].py"
 ```
 
 ---
@@ -191,15 +213,15 @@ Task: "Update logging dashboards in cluster/apps/<service>/monitoring.yaml"
 
 ### MVP First (User Story 1 Only)
 
-1. Complete Phase 1: GitOps & Documentation Foundations
-2. Complete Phase 2: Provisioning & Node Health (blocks workload phases)
+1. Complete Phase 1: Setup
+2. Complete Phase 2: Foundational (CRITICAL - blocks all stories)
 3. Complete Phase 3: User Story 1
 4. **STOP and VALIDATE**: Test User Story 1 independently
 5. Deploy/demo if ready
 
 ### Incremental Delivery
 
-1. Complete Phases 1 + 2 → Foundation ready
+1. Complete Setup + Foundational → Foundation ready
 2. Add User Story 1 → Test independently → Deploy/Demo (MVP!)
 3. Add User Story 2 → Test independently → Deploy/Demo
 4. Add User Story 3 → Test independently → Deploy/Demo
@@ -209,8 +231,8 @@ Task: "Update logging dashboards in cluster/apps/<service>/monitoring.yaml"
 
 With multiple developers:
 
-1. Team completes Phases 1 + 2 together
-2. Once Phase 2 is done:
+1. Team completes Setup + Foundational together
+2. Once Foundational is done:
    - Developer A: User Story 1
    - Developer B: User Story 2
    - Developer C: User Story 3

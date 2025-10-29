@@ -4,7 +4,7 @@
 - Four Raspberry Pi 4 Model B (8GB RAM) with SSD or high-endurance SD storage, PoE or stable power, and wired Ethernet.
 - Workstation (this machine) with:
   - Python 3.11+
-  - Ansible 2.16+ (`pip install ansible`)
+  - `uv` CLI for Python environment management
   - `kubectl` 1.29+
   - `helm` 3.14+
   - `age` for key management and `sops` for manifest encryption
@@ -12,20 +12,30 @@
 - Access to this repository (branch `001-deploy-pi-k3s`).
 
 ## 1. Prepare Workstation Environment
-1. Install Python dependencies:
+1. Install `uv` (Linux example):
    ```bash
-   pip install ansible ansible-lint kubernetes
+   curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
-2. Install SOPS and age (Debian/Ubuntu example):
+   Restart your shell or source the indicated profile script.
+2. Create and activate the project virtual environment:
+   ```bash
+   uv venv .venv
+   source .venv/bin/activate
+   ```
+3. Install Python dependencies via `uv pip`:
+   ```bash
+   uv pip install ansible ansible-lint kubernetes
+   ```
+4. Install SOPS and age (Debian/Ubuntu example):
    ```bash
    sudo apt install sops age
    ```
-3. Generate age key pair and store in `~/.config/sops/age/keys.txt` (keep offline backup):
+5. Generate age key pair and store in `~/.config/sops/age/keys.txt` (keep offline backup):
    ```bash
    age-keygen -o ~/.config/sops/age/keys.txt
    ```
-4. Export `SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt` in shell profile.
-5. Verify `kubectl` context is unset (will be configured after bootstrap).
+6. Export `SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt` in shell profile.
+7. Verify `kubectl` context is unset (will be configured after bootstrap).
 
 ## 2. Flash and Configure Raspberry Pi Nodes
 1. Flash Raspberry Pi OS Lite 64-bit to each SSD/SD.
