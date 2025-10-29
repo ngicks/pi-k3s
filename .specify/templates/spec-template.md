@@ -67,38 +67,33 @@
 
 ### Edge Cases
 
-<!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right edge cases.
--->
-
-- What happens when [boundary condition]?
-- How does system handle [error scenario]?
+- Node bootstrap fails mid-run (power loss, flaky storage) — automation MUST resume cleanly.
+- GitOps controller is offline — define how deployments are blocked and recovered.
+- Secrets rotation occurs during deployment — document blast radius and recovery.
 
 ## Requirements *(mandatory)*
 
-<!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right functional requirements.
--->
-
 ### Functional Requirements
 
-- **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
-- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]  
-- **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
-- **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
-- **FR-005**: System MUST [behavior, e.g., "log all security events"]
-
-*Example of marking unclear requirements:*
-
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+- **FR-001**: Automation MUST submit all cluster changes through GitOps with diff evidence attached.
+- **FR-002**: Provisioning workflows MUST rebuild a node from blank media within 60 minutes.
+- **FR-003**: Workloads MUST ship arm64 images or a documented build pipeline.
+- **FR-004**: Monitoring MUST emit alerts for workload and node health aligned with observability principle.
+- **FR-005**: Runbooks MUST be updated alongside the feature and linked in this spec.
+- **FR-006**: Secrets MUST remain encrypted-at-rest in source control. TODO(SECRET_TOOL): Confirm mechanism.
 
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]
 - **[Entity 2]**: [What it represents, relationships to other entities]
+
+## Operational Readiness *(mandatory)*
+
+- **GitOps Evidence**: Attach expected `kubectl diff`/`helm template` output or CI job references.
+- **Idempotence Proof**: Describe how provisioning or scripts demonstrate repeatable convergence.
+- **Access & Secrets**: Detail RBAC changes and how secrets stay encrypted (reference TODOs if unresolved).
+- **Observability Hooks**: Enumerate metrics/logs/alerts added or updated for this feature.
+- **Runbook Updates**: Identify `docs/runbooks/` entries touched and validation steps executed post-change.
 
 ## Success Criteria *(mandatory)*
 
