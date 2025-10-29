@@ -1,0 +1,287 @@
+openapi: 3.1.0
+info:
+  title: Pi k3s Operations API
+  version: 0.1.0
+  description: >-
+    Internal contract describing how operators record manual automation events,
+    configuration changes, and alert tests for the Raspberry Pi k3s cluster.
+servers:
+  - url: https://ops.local/api
+paths:
+  /operations/bootstrap:
+    post:
+      summary: Record completion of cluster bootstrap across control-plane and worker nodes
+      operationId: recordBootstrap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BootstrapEvent'
+      responses:
+        '201':
+          description: Bootstrap recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProvisioningRun'
+  /operations/rebuild:
+    post:
+      summary: Log a node rebuild execution and outcome
+      operationId: recordRebuild
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RebuildEvent'
+      responses:
+        '201':
+          description: Rebuild recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProvisioningRun'
+  /operations/configuration-changes:
+    post:
+      summary: Submit metadata for a configuration change applied via manual kubectl/helm workflows
+      operationId: createConfigurationChange
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigurationChange'
+      responses:
+        '201':
+          description: Change recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationChange'
+  /operations/configuration-changes/{changeId}/evidence:
+    post:
+      summary: Attach diff or command evidence to an existing configuration change
+      operationId: attachEvidence
+      parameters:
+        - name: changeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManualApplyEvidence'
+      responses:
+        '201':
+          description: Evidence attached
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManualApplyEvidence'
+  /health/cluster:
+    get:
+      summary: Retrieve current HA cluster health snapshot
+      operationId: getClusterHealth
+      responses:
+        '200':
+          description: Cluster health summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterHealth'
+  /alerts/tests:
+    post:
+      summary: Record results of alert route tests (e.g., synthetic outage drills)
+      operationId: recordAlertTest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertTest'
+      responses:
+        '201':
+          description: Alert test recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertRoute'
+components:
+  schemas:
+    BootstrapEvent:
+      type: object
+      required: [runId, nodes, startedAt, completedAt, initiatedBy]
+      properties:
+        runId:
+          type: string
+          format: uuid
+        initiatedBy:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        nodes:
+          type: array
+          minItems: 4
+          items:
+            $ref: '#/components/schemas/NodeRole'
+        diffArtifactsPath:
+          type: string
+          description: Repository path containing diff outputs
+    RebuildEvent:
+      type: object
+      required: [runId, nodeId, startedAt, completedAt, initiatedBy, status]
+      properties:
+        runId:
+          type: string
+          format: uuid
+        nodeId:
+          type: string
+        initiatedBy:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [success, failed]
+        durationMinutes:
+          type: integer
+          maximum: 60
+        logsPath:
+          type: string
+    ConfigurationChange:
+      type: object
+      required: [changeId, featureBranch, manifestPaths, status]
+      properties:
+        changeId:
+          type: string
+          format: uuid
+        featureBranch:
+          type: string
+        manifestPaths:
+          type: array
+          items:
+            type: string
+        diffSummary:
+          type: string
+        status:
+          type: string
+          enum: [draft, pending-review, applied, rolled-back]
+        reviewers:
+          type: array
+          items:
+            type: string
+        appliedAt:
+          type: string
+          format: date-time
+        runbookUpdates:
+          type: array
+          items:
+            type: string
+    ManualApplyEvidence:
+      type: object
+      required: [evidenceId, command, outputPath, timestamp]
+      properties:
+        evidenceId:
+          type: string
+          format: uuid
+        command:
+          type: string
+          enum: [kubectl diff, helm diff, ansible-playbook --check]
+        outputPath:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        operatorId:
+          type: string
+    ProvisioningRun:
+      type: object
+      required: [runId, status]
+      properties:
+        runId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, success, failed]
+        durationMinutes:
+          type: integer
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeRole'
+    NodeRole:
+      type: object
+      required: [nodeId, role]
+      properties:
+        nodeId:
+          type: string
+        role:
+          type: string
+          enum: [server-agent, worker]
+    ClusterHealth:
+      type: object
+      properties:
+        controlPlaneHealthy:
+          type: boolean
+        workerCount:
+          type: integer
+        etcdQuorum:
+          type: boolean
+        lastAlertTest:
+          type: string
+          format: date-time
+        outstandingIncidents:
+          type: integer
+    AlertTest:
+      type: object
+      required: [routeId, initiatedBy, startedAt, completedAt, result]
+      properties:
+        routeId:
+          type: string
+          format: uuid
+        initiatedBy:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        result:
+          type: string
+          enum: [success, failed]
+        notes:
+          type: string
+    AlertRoute:
+      type: object
+      required: [routeId, alertName, severity, channel]
+      properties:
+        routeId:
+          type: string
+          format: uuid
+        alertName:
+          type: string
+        severity:
+          type: string
+          enum: [critical, warning]
+        channel:
+          type: string
+        acknowledgementTarget:
+          type: string
+        lastTestedAt:
+          type: string
+          format: date-time
