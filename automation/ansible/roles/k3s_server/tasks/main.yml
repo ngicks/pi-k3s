@@ -1,0 +1,5 @@
+---
+# Tasks for installing k3s server nodes
+- name: Placeholder for k3s server install
+  ansible.builtin.debug:
+    msg: "Implement k3s server installation tasks"

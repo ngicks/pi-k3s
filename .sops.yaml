@@ -1,0 +1,13 @@
+keys:
+  - &age main-age
+    type: age
+    enc: ""  # todo: replace with team age recipients
+creation_rules:
+  - path_regex: "cluster/(.*)\.ya?ml"
+    key_groups:
+      - age:
+          - *age
+  - path_regex: "docs/governance/(.*)\.md"
+    key_groups:
+      - age:
+          - *age

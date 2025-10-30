@@ -1,0 +1,5 @@
+---
+# Tasks for preparing Raspberry Pi OS for k3s
+- name: Placeholder for base OS preparation
+  ansible.builtin.debug:
+    msg: "Implement base OS preparation tasks (packages, kernel tuning, cgroups)"

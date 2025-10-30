@@ -62,12 +62,12 @@ description: "Task list for feature implementation"
 
 **Purpose**: Ensure automation scaffolding, secrets handling, and manual diff capture exist before story work.
 
-- [ ] T005 Create role scaffolding (`tasks/`, `handlers/`, `templates/`) for `base_os`, `k3s_server`, `k3s_agent`, and `post_bootstrap` under `automation/ansible/roles/`.
-- [ ] T006 [P] Stub playbook entry points in `automation/ansible/site.yml` with plays targeting control-plane and worker groups.
-- [ ] T007 [P] Configure repository-wide SOPS policy in `.sops.yaml` covering `cluster/` and `docs/governance/`.
-- [ ] T008 [P] Add diff collection helper script `automation/scripts/collect-diff.sh` that wraps `kubectl diff`/`helm diff` and stores artifacts under `docs/governance/reviews/`.
-- [ ] T009 [P] Capture secrets rotation checklist skeleton in `docs/runbooks/secrets-rotation.md`.
-- [ ] T010 Record hardware/environment prerequisites in `docs/runbooks/hardware.md`.
+- [X] T005 Create role scaffolding (`tasks/`, `handlers/`, `templates/`) for `base_os`, `k3s_server`, `k3s_agent`, and `post_bootstrap` under `automation/ansible/roles/`.
+- [X] T006 [P] Stub playbook entry points in `automation/ansible/site.yml` with plays targeting control-plane and worker groups.
+- [X] T007 [P] Configure repository-wide SOPS policy in `.sops.yaml` covering `cluster/` and `docs/governance/`.
+- [X] T008 [P] Add diff collection helper script `automation/scripts/collect-diff.sh` that wraps `kubectl diff`/`helm diff` and stores artifacts under `docs/governance/reviews/`.
+- [X] T009 [P] Capture secrets rotation checklist skeleton in `docs/runbooks/secrets-rotation.md`.
+- [X] T010 Record hardware/environment prerequisites in `docs/runbooks/hardware.md`.
 
 **Checkpoint**: Provisioning scaffolding ready; story-specific automation can proceed.
 

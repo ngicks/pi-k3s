@@ -1,0 +1,24 @@
+---
+- name: Prepare control-plane nodes
+  hosts: control_plane
+  become: true
+  vars:
+    k3s_role: server
+  roles:
+    - base_os
+    - k3s_server
+
+- name: Prepare worker nodes
+  hosts: workers
+  become: true
+  vars:
+    k3s_role: agent
+  roles:
+    - base_os
+    - k3s_agent
+
+- name: Post-bootstrap tasks
+  hosts: control_plane[0]
+  become: true
+  roles:
+    - post_bootstrap

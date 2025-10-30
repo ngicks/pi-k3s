@@ -1,0 +1,5 @@
+---
+# Tasks for installing k3s worker nodes
+- name: Placeholder for k3s agent install
+  ansible.builtin.debug:
+    msg: "Implement k3s agent installation tasks"

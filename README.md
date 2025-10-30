@@ -23,3 +23,5 @@ Home-lab automation for provisioning and operating a Raspberry Pi k3s cluster.
    ```
 
 Whenever dependencies change, rerun `uv pip install -r pyproject.toml` while the environment is active to stay in sync. Deactivate with `deactivate` when finished.
+
+Set `K3S_SSH_USER` in your shell (e.g., `export K3S_SSH_USER=ubuntu`) before running playbooks so Ansible connects with the correct remote account.

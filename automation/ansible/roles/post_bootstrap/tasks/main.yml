@@ -1,0 +1,5 @@
+---
+# Tasks for post-bootstrap actions (kubeconfig retrieval etc.)
+- name: Placeholder for post-bootstrap tasks
+  ansible.builtin.debug:
+    msg: "Implement kubeconfig retrieval and post-bootstrap steps"
