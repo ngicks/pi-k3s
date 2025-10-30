@@ -8,7 +8,7 @@
   - `kubectl` 1.29+
   - `helm` 3.14+
   - `age` for key management and `sops` for manifest encryption
-- Static IP reservations or documented DHCP leases for each node (`pi-1` … `pi-4`).
+- Static IP reservations or documented DHCP leases for each node (`pi-cluster-1.local` … `pi-cluster-4.local`).
 - Access to this repository (branch `001-deploy-pi-k3s`).
 
 ## 1. Prepare Workstation Environment
@@ -40,10 +40,10 @@
 ## 2. Flash and Configure Raspberry Pi Nodes
 1. Flash Raspberry Pi OS Lite 64-bit to each SSD/SD.
 2. Enable SSH by creating empty `ssh` file on boot partition.
-3. For each node:
+3. For each node (replace `<n>` with 1–4):
    ```bash
-   ssh pi@pi-<n>
-   sudo raspi-config nonint do_hostname pi-<n>
+   ssh pi@pi-cluster-<n>.local
+   sudo raspi-config nonint do_hostname pi-cluster-<n>
    sudo raspi-config nonint do_ssh 0
    sudo raspi-config nonint do_boot_behaviour B1
    sudo raspi-config nonint do_wait_for_network 1
@@ -87,9 +87,9 @@
    ```
 2. Trigger synthetic alert test (cordon server node 2):
    ```bash
-   kubectl cordon pi-2
+   kubectl cordon pi-cluster-2
    sleep 300
-   kubectl uncordon pi-2
+   kubectl uncordon pi-cluster-2
    ```
 3. Confirm alert notification reached maintainer channel and log result in governance review.
 
@@ -97,7 +97,7 @@
 1. Power-cycle node 4 and reimage storage.
 2. Execute Ansible playbook targeting node 4:
    ```bash
-   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/site.yml --limit pi-4
+   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/site.yml --limit pi-cluster-4.local
    ```
 3. Ensure node returns to Ready state within 60 minutes and workloads reschedule correctly.
 4. Capture duration metrics and update runbook checklist.

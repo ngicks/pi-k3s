@@ -1,0 +1,18 @@
+[project]
+name = "pi-k3s-automation"
+version = "0.1.0"
+description = "Tooling environment for Raspberry Pi k3s automation"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "ansible>=8.6,<9.0",
+  "ansible-lint>=6.20",
+  "kubernetes>=28.1"
+]
+
+[tool.uv]
+managed = true
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"

@@ -25,7 +25,7 @@ Platform maintainers need to provision a baseline k3s control plane across Raspb
 
 **Acceptance Scenarios**:
 
-1. **Given** four Raspberry Pi 4 nodes with approved hardware specs, **When** maintainers run the bootstrap automation, **Then** nodes 1–3 come online as control-plane members (server+agent) and node 4 registers as the dedicated worker ready for manual manifest application.
+1. **Given** four Raspberry Pi 4 nodes with approved hardware specs, **When** maintainers run the bootstrap automation, **Then** hosts `pi-cluster-1.local` through `pi-cluster-3.local` come online as control-plane members (server+agent) and `pi-cluster-4.local` registers as the dedicated worker ready for manual manifest application.
 2. **Given** the repository of baseline manifests, **When** a change is staged, **Then** operators produce diff evidence (e.g., `kubectl diff`) before applying the update and record the outcome.
 
 ---
@@ -95,7 +95,7 @@ Maintainers require real-time observability of cluster health and clear runbooks
 - Maintainers will provision an internal secrets management key pair stored offline and referenced by the repository’s encryption workflow.
 - Operators have secure shell access from a workstation with kubectl and helm configured against the cluster API endpoint.
 - Future workloads will adopt the provided baseline observability stack without requiring incompatible tooling.
-- Nodes 1–3 are dedicated to the control-plane (server+agent) quorum while node 4 remains a worker-only participant for HA evaluation.
+- Hosts `pi-cluster-1.local` through `pi-cluster-3.local` are dedicated to the control-plane (server+agent) quorum while `pi-cluster-4.local` remains a worker-only participant for HA evaluation.
 
 ## Operational Readiness *(mandatory)*
 

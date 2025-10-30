@@ -3,7 +3,7 @@
 ## Entities
 
 ### ClusterNode
-- **Identifiers**: `node_id` (string, format `pi-<number>`), unique; `hostname`
+- **Identifiers**: `node_id` (string, format `pi-cluster-<number>.local`), unique; `hostname`
 - **Attributes**:
   - `role` (enum: `server-agent`, `worker`)
   - `hardware_profile` (CPU, RAM, storage type)

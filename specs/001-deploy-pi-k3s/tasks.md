@@ -51,10 +51,10 @@ description: "Task list for feature implementation"
 
 **Purpose**: Prepare repository artifacts, inventory, and configuration required before automation work begins.
 
-- [ ] T001 Create Ansible inventory with control-plane/workers groups in `automation/ansible/inventory/hosts.yml`.
-- [ ] T002 Add Ansible configuration defaults (pipelining, callbacks) in `automation/ansible/ansible.cfg`.
-- [ ] T003 [P] Initialize `uv` project configuration in `pyproject.toml` declaring Ansible tooling dependencies (`ansible`, `ansible-lint`, `kubernetes`).
-- [ ] T004 [P] Document `uv` environment setup and usage steps in `README.md`, including commands to create/activate the virtual environment.
+- [X] T001 Create Ansible inventory with control-plane/workers groups in `automation/ansible/inventory/hosts.yml`.
+- [X] T002 Add Ansible configuration defaults (pipelining, callbacks) in `automation/ansible/ansible.cfg`.
+- [X] T003 [P] Initialize `uv` project configuration in `pyproject.toml` declaring Ansible tooling dependencies (`ansible`, `ansible-lint`, `kubernetes`).
+- [X] T004 [P] Document `uv` environment setup and usage steps in `README.md`, including commands to create/activate the virtual environment.
 
 ---
 
@@ -105,7 +105,7 @@ description: "Task list for feature implementation"
 
 **Goal**: Rebuild failed node within 60 minutes using idempotent automation and documented drills.
 
-**Independent Test**: Wipe worker node storage, rerun Ansible with `--limit pi-4`, confirm node rejoins cluster and workloads reschedule inside 60 minutes while logging metrics.
+**Independent Test**: Wipe worker node storage, rerun Ansible with `--limit pi-cluster-4.local`, confirm node rejoins cluster and workloads reschedule inside 60 minutes while logging metrics.
 
 ### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
 
@@ -114,7 +114,7 @@ description: "Task list for feature implementation"
 
 ### Implementation for User Story 2
 
-- [ ] T023 [P] [US2] Add rebuild play targeting `pi-4` with tags in `automation/ansible/site.yml`.
+- [ ] T023 [P] [US2] Add rebuild play targeting `pi-cluster-4.local` with tags in `automation/ansible/site.yml`.
 - [ ] T024 [P] [US2] Implement rebuild-specific tasks and handlers in `automation/ansible/roles/k3s_agent/tasks/rebuild.yml`.
 - [ ] T025 [US2] Create rebuild automation wrapper `automation/scripts/rebuild-node.sh` measuring elapsed time.
 - [ ] T026 [US2] Capture detailed rebuild runbook in `docs/runbooks/rebuild-node.md` with validation checklist.
