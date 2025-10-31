@@ -11,3 +11,7 @@ creation_rules:
     key_groups:
       - age:
           - *age
+  - path_regex: "automation/ansible/group_vars/.*\\.sops\\.ya?ml"
+    key_groups:
+      - age:
+          - *age

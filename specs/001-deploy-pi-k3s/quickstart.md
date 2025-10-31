@@ -22,9 +22,9 @@
    uv venv .venv
    source .venv/bin/activate
    ```
-3. Install Python dependencies via `uv pip`:
+3. Install Python dependencies declared in `pyproject.toml`:
    ```bash
-   uv pip install ansible ansible-lint kubernetes
+   uv pip install -r pyproject.toml
    ```
 4. Install SOPS and age (Debian/Ubuntu example):
    ```bash
@@ -34,8 +34,17 @@
    ```bash
    age-keygen -o ~/.config/sops/age/keys.txt
    ```
-6. Export `SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt` in shell profile.
-7. Verify `kubectl` context is unset (will be configured after bootstrap).
+6. Export environment variables for SSH identity and SOPS key path:
+   ```bash
+   export K3S_SSH_USER=ubuntu          # replace with your SSH username
+   export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
+   ```
+7. Populate encrypted sudo credentials:
+   ```bash
+   sops automation/ansible/group_vars/all/vault.sops.yml
+   ```
+   Add `k3s_sudo_password` inside the editor; SOPS will encrypt on save.
+8. Verify `kubectl` context is unset (will be configured after bootstrap).
 
 ## 2. Flash and Configure Raspberry Pi Nodes
 1. Flash Raspberry Pi OS Lite 64-bit to each SSD/SD.
