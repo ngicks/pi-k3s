@@ -1,4 +1,0 @@
-# Use `sops automation/ansible/group_vars/all/vault.sops.yml` to populate secrets.
-# This file should remain encrypted in version control.
-
-k3s_sudo_password: ""

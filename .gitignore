@@ -7,3 +7,4 @@ __pycache__/
 .vscode/
 *.log
 docs/governance/reviews/**/*.diff
+automation/ansible/group_vars/all/*.sops.*
