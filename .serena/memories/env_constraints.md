@@ -1,0 +1,1 @@
+The assistant operates inside a jailed environment with no access to secret information. All tasks must assume no sensitive data is present or exposed.

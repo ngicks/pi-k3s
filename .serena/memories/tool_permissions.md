@@ -1,0 +1,1 @@
+Agents must prefer Serena MCP tools, but when a user explicitly specifies a file path that Serena cannot locate, the built-in Read tool may be used to read that file.

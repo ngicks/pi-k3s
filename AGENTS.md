@@ -8,7 +8,7 @@ This project has been onboarded with the Serena MCP tool. Use `mcp__serena__` co
 
 - You must use serena tools where possible.
 - You'll have to read/update serena memory.
-- You must not use built-in read / write tool
+- You must not use built-in read / write tool, except that you may use the Read internal tool to read a file when the user explicitly provides its path and the file cannot be located through Serena tooling.
 - You must not use bash to search lines, symbols. Just update serena memory and use serena tools.
 
 ## Active Technologies

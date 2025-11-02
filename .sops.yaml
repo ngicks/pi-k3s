@@ -1,17 +1,6 @@
-keys:
-  - &age main-age
-    type: age
-    enc: ""  # todo: replace with team age recipients
 creation_rules:
-  - path_regex: "cluster/(.*)\.ya?ml"
-    key_groups:
-      - age:
-          - *age
-  - path_regex: "docs/governance/(.*)\.md"
-    key_groups:
-      - age:
-          - *age
-  - path_regex: "automation/ansible/group_vars/.*\\.sops\\.ya?ml"
-    key_groups:
-      - age:
-          - *age
+  - path_regex: .*\.sops\.yaml
+    age: >-
+      age167hh84wz5rpp0wk6h3h0pgxl7lrqd686hlk8dd4e08lejt48mqkq4fggny
+    
+  
