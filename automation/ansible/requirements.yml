@@ -1,4 +1,4 @@
 collections:
   - name: community.sops
-    version: 1.6.7
+    version: 2.2.6
     source: https://galaxy.ansible.com

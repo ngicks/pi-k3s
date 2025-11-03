@@ -1,0 +1,18 @@
+---
+- name: Configure static networking for k3s nodes
+  hosts: k3s_cluster
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Apply netplan static configuration
+      ansible.builtin.include_role:
+        name: base_os
+        tasks_from: network
+
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Reboot if netplan was changed
+      ansible.builtin.reboot:
+        reboot_timeout: 600
+      when: hostvars[inventory_hostname].get('k3s_netplan_changed', False)

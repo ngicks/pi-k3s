@@ -1,13 +1,14 @@
----
-- name: Assert required variables for post-bootstrap
-  ansible.builtin.assert:
-    that:
-      - k3s_api_endpoint is defined
-    fail_msg: "k3s_api_endpoint must be defined to retrieve kubeconfig."
+- name: Determine primary control-plane host
+  ansible.builtin.set_fact:
+    post_bootstrap_primary_control_plane: "{{ groups['control_plane'][0] }}"
+
+- name: Calculate effective API endpoint
+  ansible.builtin.set_fact:
+    post_bootstrap_effective_api_endpoint: "{{ k3s_api_endpoint | default(hostvars[post_bootstrap_primary_control_plane].inventory_hostname) }}"
 
 - name: Wait for Kubernetes API to become reachable
   ansible.builtin.wait_for:
-    host: "{{ k3s_api_endpoint }}"
+    host: "{{ post_bootstrap_effective_api_endpoint }}"
     port: 6443
     delay: 5
     timeout: "{{ post_bootstrap_wait_timeout }}"
@@ -28,7 +29,7 @@
 
 - name: Write kubeconfig with updated server endpoint
   ansible.builtin.copy:
-    content: "{{ raw_kubeconfig.content | b64decode | regex_replace('https://127.0.0.1:6443', 'https://' ~ k3s_api_endpoint ~ ':6443') }}"
+    content: "{{ raw_kubeconfig.content | b64decode | regex_replace('https://127.0.0.1:6443', 'https://' ~ post_bootstrap_effective_api_endpoint ~ ':6443') }}"
     dest: "{{ post_bootstrap_local_kubeconfig }}"
     mode: "0600"
   delegate_to: localhost

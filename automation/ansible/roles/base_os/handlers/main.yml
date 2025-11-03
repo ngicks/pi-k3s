@@ -10,3 +10,8 @@
     state: touch
     mode: "0644"
   listen: flag reboot required
+
+- name: apply netplan
+  ansible.builtin.command: netplan apply
+  listen: apply netplan
+

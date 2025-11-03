@@ -5,3 +5,7 @@ tls-san:
   - "{{ san }}"
 {% endfor %}
 {% endif %}
+token: "{{ k3s_cluster_token }}"
+{% if not k3s_cluster_init %}
+server: "https://{{ k3s_effective_api_endpoint }}:6443"
+{% endif %}
