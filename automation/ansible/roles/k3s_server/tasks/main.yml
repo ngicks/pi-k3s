@@ -1,5 +1,93 @@
 ---
-# Tasks for installing k3s server nodes
-- name: Placeholder for k3s server install
-  ansible.builtin.debug:
-    msg: "Implement k3s server installation tasks"
+- name: Ensure required variables are defined for servers
+  ansible.builtin.assert:
+    that:
+      - k3s_cluster_token is defined
+      - k3s_channel is defined
+      - inventory_hostname in groups['control_plane']
+      - (k3s_api_endpoint is defined) or (inventory_hostname == groups['control_plane'][0])
+    fail_msg: "k3s_cluster_token and k3s_api_endpoint must be defined for control-plane installation."
+
+- name: Determine node IP for k3s
+  ansible.builtin.set_fact:
+    k3s_node_ip: "{{ ansible_default_ipv4.address }}"
+
+- name: Check if this server initializes the cluster
+  ansible.builtin.set_fact:
+    k3s_cluster_init: "{{ inventory_hostname == groups['control_plane'][0] }}"
+
+- name: Calculate effective API endpoint
+  ansible.builtin.set_fact:
+    k3s_effective_api_endpoint: "{{ k3s_api_endpoint | default(k3s_node_ip) }}"
+
+- name: Build TLS SAN entries
+  ansible.builtin.set_fact:
+    k3s_server_tls_sans_effective: "{{ (k3s_server_tls_sans + (groups['control_plane'] | default([], true))) | unique }}"
+
+- name: Ensure k3s configuration directory exists
+  ansible.builtin.file:
+    path: /etc/rancher/k3s
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render minimal k3s server config
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: /etc/rancher/k3s/config.yaml
+    owner: root
+    group: root
+    mode: "0640"
+  notify: restart k3s
+
+- name: Check for existing k3s binary
+  ansible.builtin.stat:
+    path: /usr/local/bin/k3s
+  register: k3s_binary
+
+- name: Capture current k3s service ExecStart
+  ansible.builtin.command: "grep '^ExecStart=' /etc/systemd/system/k3s.service"
+  register: k3s_service_exec
+  failed_when: false
+  changed_when: false
+
+- name: Build k3s server exec arguments
+  ansible.builtin.set_fact:
+    k3s_server_exec_args: >-
+      {{
+        ['server']
+        + (['--cluster-init'] if k3s_cluster_init else ['--server https://' ~ k3s_effective_api_endpoint ~ ':6443'])
+        + ['--write-kubeconfig-mode 0640']
+        + (k3s_server_disable_components | map('regex_replace', '^(.*)$', '--disable \\1') | list)
+      }}
+
+- name: Build desired k3s ExecStart line
+  ansible.builtin.set_fact:
+    k3s_server_exec_line: "ExecStart=/usr/local/bin/k3s {{ k3s_server_exec_args | join(' ') }}"
+
+- name: Determine if k3s installation needs to run
+  ansible.builtin.set_fact:
+    k3s_install_required: "{{ (not k3s_binary.stat.exists) or (k3s_service_exec.rc != 0) or (k3s_service_exec.stdout | default('') | trim != k3s_server_exec_line) }}"
+
+- name: Install k3s server
+  ansible.builtin.shell: curl -sfL https://get.k3s.io | sh -
+  environment:
+    K3S_TOKEN: "{{ k3s_cluster_token }}"
+    INSTALL_K3S_CHANNEL: "{{ k3s_channel }}"
+    K3S_NODE_NAME: "{{ inventory_hostname }}"
+    K3S_NODE_IP: "{{ k3s_node_ip }}"
+    INSTALL_K3S_EXEC: "{{ k3s_server_exec_args | join(' ') }}"
+    K3S_URL: "{{ ('https://' ~ k3s_effective_api_endpoint ~ ':6443') if not k3s_cluster_init else omit }}"
+    INSTALL_K3S_SKIP_DOWNLOAD: "{{ 'true' if k3s_binary.stat.exists else omit }}"
+    INSTALL_K3S_FORCE_RESTART: "{{ 'true' if k3s_binary.stat.exists else omit }}"
+  when: k3s_install_required
+  register: k3s_install_result
+  changed_when: k3s_install_result.rc == 0
+
+- name: Ensure k3s service is enabled
+  ansible.builtin.systemd:
+    name: k3s
+    enabled: true
+    state: started
+  when: not ansible_check_mode

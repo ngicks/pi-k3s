@@ -1,5 +1,65 @@
 ---
-# Tasks for installing k3s worker nodes
-- name: Placeholder for k3s agent install
-  ansible.builtin.debug:
-    msg: "Implement k3s agent installation tasks"
+- name: Ensure required variables are defined for agents
+  ansible.builtin.assert:
+    that:
+      - k3s_cluster_token is defined
+      - k3s_api_endpoint is defined
+      - k3s_channel is defined
+    fail_msg: "k3s_cluster_token, k3s_api_endpoint, and k3s_channel must be provided for agent nodes."
+
+- name: Determine node IP for agent
+  ansible.builtin.set_fact:
+    k3s_node_ip: "{{ ansible_default_ipv4.address }}"
+
+- name: Build label arguments
+  ansible.builtin.set_fact:
+    k3s_agent_label_args: "{{ k3s_agent_labels | map('regex_replace', '^(.*)$', '--node-label \\1') | list }}"
+
+- name: Build taint arguments
+  ansible.builtin.set_fact:
+    k3s_agent_taint_args: "{{ k3s_agent_taints | map('regex_replace', '^(.*)$', '--node-taint \\1') | list }}"
+
+- name: Compose agent exec arguments
+  ansible.builtin.set_fact:
+    k3s_agent_exec_args: "{{ ['agent', '--node-ip ' ~ k3s_node_ip] + k3s_agent_label_args + k3s_agent_taint_args }}"
+
+- name: Check for existing k3s binary
+  ansible.builtin.stat:
+    path: /usr/local/bin/k3s
+  register: k3s_binary
+
+- name: Capture current k3s-agent service ExecStart
+  ansible.builtin.command: "grep '^ExecStart=' /etc/systemd/system/k3s-agent.service"
+  register: k3s_agent_service_exec
+  failed_when: false
+  changed_when: false
+
+- name: Build desired k3s-agent ExecStart line
+  ansible.builtin.set_fact:
+    k3s_agent_exec_line: "ExecStart=/usr/local/bin/k3s {{ k3s_agent_exec_args | join(' ') }}"
+
+- name: Determine if k3s agent installation needs to run
+  ansible.builtin.set_fact:
+    k3s_agent_install_required: "{{ (not k3s_binary.stat.exists) or (k3s_agent_service_exec.rc != 0) or (k3s_agent_service_exec.stdout | default('') | trim != k3s_agent_exec_line) }}"
+
+- name: Install k3s agent
+  ansible.builtin.shell: curl -sfL https://get.k3s.io | sh -
+  environment:
+    K3S_TOKEN: "{{ k3s_cluster_token }}"
+    K3S_URL: "https://{{ k3s_api_endpoint }}:6443"
+    INSTALL_K3S_CHANNEL: "{{ k3s_channel }}"
+    K3S_NODE_NAME: "{{ inventory_hostname }}"
+    K3S_NODE_IP: "{{ k3s_node_ip }}"
+    INSTALL_K3S_EXEC: "{{ k3s_agent_exec_args | join(' ') }}"
+    INSTALL_K3S_SKIP_DOWNLOAD: "{{ 'true' if k3s_binary.stat.exists else omit }}"
+    INSTALL_K3S_FORCE_RESTART: "{{ 'true' if k3s_binary.stat.exists else omit }}"
+  when: k3s_agent_install_required
+  register: k3s_agent_install_result
+  changed_when: k3s_agent_install_result.rc == 0
+
+- name: Ensure k3s-agent service is enabled
+  ansible.builtin.systemd:
+    name: k3s-agent
+    enabled: true
+    state: started
+  when: not ansible_check_mode

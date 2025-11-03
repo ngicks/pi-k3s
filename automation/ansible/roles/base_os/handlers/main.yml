@@ -1,0 +1,12 @@
+---
+- name: reload sysctl
+  ansible.builtin.command: sysctl --system
+  listen: reload sysctl
+  changed_when: false
+
+- name: flag reboot required
+  ansible.builtin.file:
+    path: /var/run/reboot-required
+    state: touch
+    mode: "0644"
+  listen: flag reboot required

@@ -18,6 +18,14 @@ description: "Task list template for feature implementation"
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
 - Include exact file paths in descriptions
 
+**Constitution Compliance Tasks**  
+Add explicit tasks covering:
+- GitOps evidence capture (`docs/governance/` updates, diff artifact commits)
+- Rebuild automation validation (Ansible checks, drill execution, runbook refresh)
+- Secrets rotation or SOPS recipient updates with audit logging
+- Observability instrumentation and synthetic alert drills
+- Runbook updates and review sign-off for manual change control
+
 ## Path Conventions
 
 - **Single project**: `src/`, `tests/` at repository root

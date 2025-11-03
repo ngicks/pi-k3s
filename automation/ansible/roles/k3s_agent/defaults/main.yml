@@ -1,0 +1,6 @@
+---
+k3s_channel: stable
+k3s_cluster_token: "{{ lookup('env', 'K3S_CLUSTER_TOKEN') | default(omit) }}"
+k3s_api_endpoint: "{{ lookup('env', 'K3S_API_ENDPOINT') | default(omit) }}"
+k3s_agent_labels: []
+k3s_agent_taints: []

@@ -1,5 +1,39 @@
 ---
-# Tasks for post-bootstrap actions (kubeconfig retrieval etc.)
-- name: Placeholder for post-bootstrap tasks
+- name: Assert required variables for post-bootstrap
+  ansible.builtin.assert:
+    that:
+      - k3s_api_endpoint is defined
+    fail_msg: "k3s_api_endpoint must be defined to retrieve kubeconfig."
+
+- name: Wait for Kubernetes API to become reachable
+  ansible.builtin.wait_for:
+    host: "{{ k3s_api_endpoint }}"
+    port: 6443
+    delay: 5
+    timeout: "{{ post_bootstrap_wait_timeout }}"
+    state: started
+
+- name: Read kubeconfig from control-plane node
+  ansible.builtin.slurp:
+    src: /etc/rancher/k3s/k3s.yaml
+  register: raw_kubeconfig
+
+- name: Prepare local kubeconfig directory
+  ansible.builtin.file:
+    path: "{{ post_bootstrap_local_kubeconfig | dirname }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Write kubeconfig with updated server endpoint
+  ansible.builtin.copy:
+    content: "{{ raw_kubeconfig.content | b64decode | regex_replace('https://127.0.0.1:6443', 'https://' ~ k3s_api_endpoint ~ ':6443') }}"
+    dest: "{{ post_bootstrap_local_kubeconfig }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+
+- name: Display kubeconfig path for operators
   ansible.builtin.debug:
-    msg: "Implement kubeconfig retrieval and post-bootstrap steps"
+    msg: "Updated kubeconfig written to {{ post_bootstrap_local_kubeconfig }}"

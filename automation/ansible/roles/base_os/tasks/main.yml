@@ -1,5 +1,75 @@
 ---
-# Tasks for preparing Raspberry Pi OS for k3s
-- name: Placeholder for base OS preparation
-  ansible.builtin.debug:
-    msg: "Implement base OS preparation tasks (packages, kernel tuning, cgroups)"
+- name: Refresh apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install base packages
+  ansible.builtin.apt:
+    name: "{{ base_os_packages }}"
+    state: present
+
+- name: Disable dphys-swapfile service
+  ansible.builtin.service:
+    name: dphys-swapfile
+    state: stopped
+    enabled: false
+  register: swap_service
+  failed_when: false
+
+- name: Ensure swap is disabled
+  ansible.builtin.command: swapoff -a
+  when: (ansible_swaptotal_mb | default(0)) | int > 0
+  changed_when: (ansible_swaptotal_mb | default(0)) | int > 0
+
+- name: Comment swap entries in fstab
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^([^#].*\\sswap\\s.*)$'
+    replace: '# \\1'
+  notify: flag reboot required
+
+- name: Ensure kernel modules load file exists
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/k3s.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      br_netfilter
+      overlay
+
+- name: Load kernel modules required for k3s
+  ansible.builtin.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - br_netfilter
+    - overlay
+
+- name: Deploy k3s sysctl configuration
+  ansible.builtin.template:
+    src: sysctl.conf.j2
+    dest: /etc/sysctl.d/99-k3s.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload sysctl
+
+- name: Ensure cgroup memory options present in cmdline.txt
+  ansible.builtin.shell: |
+    if ! grep -q "cgroup_memory=1" /boot/cmdline.txt; then
+      sed -i 's/$/ cgroup_memory=1 cgroup_enable=memory systemd.unified_cgroup_hierarchy=1/' /boot/cmdline.txt
+      echo "updated"
+    fi
+  register: cmdline_update
+  changed_when: "'updated' in cmdline_update.stdout"
+  notify: flag reboot required
+
+- name: Ensure kube directories exist
+  ansible.builtin.file:
+    path: /etc/rancher/k3s
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"

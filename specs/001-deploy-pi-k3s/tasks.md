@@ -83,19 +83,19 @@ description: "Task list for feature implementation"
 
 > **NOTE: Capture `kubectl diff`/`helm template` output before applying**
 
-- [ ] T011 [P] [US1] Create bootstrap automation smoke test script `tests/automation/test_bootstrap.sh` invoking `ansible-playbook --check`.
-- [ ] T012 [P] [US1] Add baseline manifest diff test `tests/k8s-diff/test_baseline.sh` to assert clean diffs before apply.
+- [X] T011 [P] [US1] Create bootstrap automation smoke test script `tests/automation/test_bootstrap.sh` invoking `ansible-playbook --check`.
+- [X] T012 [P] [US1] Add baseline manifest diff test `tests/k8s-diff/test_baseline.sh` to assert clean diffs before apply.
 
 ### Implementation for User Story 1
 
-- [ ] T013 [P] [US1] Implement OS preparation tasks in `automation/ansible/roles/base_os/tasks/main.yml`.
-- [ ] T014 [P] [US1] Implement control-plane install tasks in `automation/ansible/roles/k3s_server/tasks/main.yml`.
-- [ ] T015 [P] [US1] Implement worker install tasks in `automation/ansible/roles/k3s_agent/tasks/main.yml`.
-- [ ] T016 [US1] Implement kubeconfig retrieval and post-bootstrap steps in `automation/ansible/roles/post_bootstrap/tasks/main.yml`.
-- [ ] T017 [US1] Wire roles with variables/handlers inside `automation/ansible/site.yml` for full-cluster apply.
-- [ ] T018 [US1] Create baseline cluster manifests (namespaces, storage, RBAC) in `cluster/base/system/`.
-- [ ] T019 [US1] Author operator bootstrap SOP in `docs/runbooks/bootstrap.md` referencing diff helper script.
-- [ ] T020 [US1] Document manual apply workflow and evidence logging in `docs/governance/reviews/bootstrap-template.md`.
+- [X] T013 [P] [US1] Implement OS preparation tasks in `automation/ansible/roles/base_os/tasks/main.yml`.
+- [X] T014 [P] [US1] Implement control-plane install tasks in `automation/ansible/roles/k3s_server/tasks/main.yml`.
+- [X] T015 [P] [US1] Implement worker install tasks in `automation/ansible/roles/k3s_agent/tasks/main.yml`.
+- [X] T016 [US1] Implement kubeconfig retrieval and post-bootstrap steps in `automation/ansible/roles/post_bootstrap/tasks/main.yml`.
+- [X] T017 [US1] Wire roles with variables/handlers inside `automation/ansible/site.yml` for full-cluster apply.
+- [X] T018 [US1] Create baseline cluster manifests (namespaces, storage, RBAC) in `cluster/base/system/`.
+- [X] T019 [US1] Author operator bootstrap SOP in `docs/runbooks/bootstrap.md` referencing diff helper script.
+- [X] T020 [US1] Document manual apply workflow and evidence logging in `docs/governance/reviews/bootstrap-template.md`.
 
 **Checkpoint**: Cluster bootstraps via Ansible, baseline manifests apply, and documentation/evidence workflow verified.
 

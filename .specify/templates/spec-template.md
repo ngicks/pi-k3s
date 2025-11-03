@@ -82,6 +82,14 @@
   Fill them out with the right functional requirements.
 -->
 
+**Constitution Alignment**  
+For each item below, describe the concrete artifacts this feature will deliver:
+- GitOps Evidence & Traceability (manifests/automation commits, diff outputs, governance log location)
+- Reproducible Automation & Rebuild Drills (idempotent roles, runbook updates, rebuild SLO validation)
+- Least-Privilege Secrets & Access Governance (SOPS-encrypted assets, credential rotations, audit evidence)
+- Observability & Alerting Validation (telemetry changes, monitoring assets, drill plan)
+- Runbooks & Manual Change Control (documentation touchpoints, evidence capture, review checkpoints)
+
 ### Functional Requirements
 
 - **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]

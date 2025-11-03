@@ -1,50 +1,66 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+- Version change: draft → 1.0.0
+- Modified principles: n/a (initial issuance)
+- Added sections: none
+- Removed sections: none
+- Templates requiring updates: .specify/templates/plan-template.md ✅ updated, .specify/templates/spec-template.md ✅ updated, .specify/templates/tasks-template.md ✅ updated
+- Follow-up TODOs: none
+-->
+# pi-k3s Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. GitOps Evidence & Traceability
+pi-k3s treats the repository as the single source of truth for infrastructure state.
+- Commit Ansible playbooks, Helm charts, Kubernetes manifests, and SOPS rules before any execution.
+- Capture and store `ansible-playbook --check`, `kubectl diff`, and `helm diff` output in `docs/governance/` prior to merging or applying changes.
+- Reject manual cluster alterations that lack repository evidence or a governance log entry.
+**Rationale**: Enforcing GitOps discipline keeps the cluster observable, auditable, and recoverable.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Reproducible Automation & Rebuild Drills
+Automation must guarantee the cluster can be rebuilt predictably within home-lab constraints.
+- Maintain idempotent Ansible roles and document required variables; failed checks must be fixed before production runs.
+- Keep bootstrap, HA failover, and rebuild runbooks current, with a 60-minute rebuild SLO for any node.
+- Schedule and log quarterly rebuild drills covering both control-plane and worker nodes.
+**Rationale**: Repeatable automation prevents drift and assures recovery from hardware failures.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Least-Privilege Secrets & Access Governance
+Secrets management prioritizes encryption, limited blast radius, and timely rotation.
+- Manage credentials exclusively via Mozilla SOPS + age; plaintext secrets MUST NOT enter the repository or command history.
+- Restrict SSH, kubeconfig, and token issuance to time-bound credentials referenced by encrypted inventory files.
+- Rotate SOPS recipients and review access logs after each secrets change or onboarding event.
+**Rationale**: Least privilege and encrypted custody reduce exposure from compromised home-lab devices.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Observability & Alerting Validation
+Operational readiness depends on continuous telemetry and alert coverage.
+- Deploy kube-prometheus-stack, Loki, and alertmanager as mandatory base manifests with version drift monitored.
+- Instrument workloads with structured logging, readiness probes, and resource alerts before declaring them production-ready.
+- Execute synthetic alert drills after each material change and archive outcomes in governance records.
+**Rationale**: Continuous observability ensures failures surface quickly and operators can respond with evidence.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Runbooks & Manual Change Control
+Manual interventions are allowed only when backed by current documentation and audit trails.
+- Publish runbooks covering bootstrap, manual apply workflow, secrets rotation, alert response, and rebuild drills in `docs/runbooks/`.
+- Update runbooks and quickstart guides within 24 hours of discovering deviations or completing drills.
+- Require governance reviews to cite the applicable runbook section and evidence artifacts before closing.
+**Rationale**: Consistent documentation keeps manual processes safe despite human-in-the-loop operations.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Operational Constraints & Stack Requirements
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+pi-k3s operates a four-node Raspberry Pi 4 Model B (8GB RAM) cluster managed entirely from this repository. The automation stack MUST use Ansible 2.16+ with `community.general` and `kubernetes.core` collections executed from the uv-managed virtual environment. Kubernetes workloads run on k3s v1.29 (stable channel) with embedded etcd; manifests must target ARM64 compatibility and honor the documented directory structure (`automation/`, `cluster/`, `docs/`, `tests/`). Helm 3.x handles packaged components, and observability relies on kube-prometheus-stack plus Loki. All secrets, inventories, and kubeconfigs stored in the repository must remain SOPS-encrypted with age recipients maintained in `.sops.yaml`. Hardware limitations (ARM64, constrained IO, residential network) require operators to document performance deviations and mitigation in governance logs.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Development & Operations Workflow
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+Work proceeds in deliberate increments that preserve auditability.
+- Initiate changes through feature specs and plans that explicitly reference each principle’s gate.
+- Before execution, collect dry-run diffs (`ansible-playbook --check`, `kubectl diff`, `helm diff`) and link them to the change record.
+- Apply changes under operator observation, then update runbooks, quickstart steps, and governance logs with observed outcomes.
+- Schedule observability drills, secrets rotation, and rebuild exercises as tasks within feature plans to keep compliance continuous.
+- Submit compliance statements during reviews confirming that principles, operational constraints, and workflow steps were satisfied.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+The constitution supersedes conflicting project guidance. Amendments require maintainer consensus recorded in `docs/governance/constitution-log.md`, including summary, rationale, affected principles, and evidence of a compliance review. Versioning follows semantic rules: MAJOR for removing or redefining principles, MINOR for adding principles or expanding operational requirements, PATCH for clarifications that do not change obligations. Every pull request must include a Constitution Check noting how work satisfies each principle; reviewers MUST block merges lacking evidence. A quarterly governance review validates observability drills, secrets rotation, rebuild compliance, and documentation freshness; findings feed back into runbooks and future specs.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2025-11-03 | **Last Amended**: 2025-11-03

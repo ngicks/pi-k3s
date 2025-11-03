@@ -31,7 +31,11 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- **GitOps Evidence & Traceability**: Show the repository branch, planned manifests/automation commits, and the location where `kubectl diff`, `helm diff`, and `ansible-playbook --check` output will be stored.
+- **Reproducible Automation & Rebuild Drills**: Document how the change keeps Ansible roles idempotent, updates rebuild/runbook steps, and meets the 60-minute node rebuild SLO.
+- **Least-Privilege Secrets & Access Governance**: Confirm secrets stay SOPS-encrypted, list new age recipients or credential rotations, and note governance log updates.
+- **Observability & Alerting Validation**: Identify telemetry additions, kube-prometheus-stack or Loki adjustments, and the synthetic alert drill that will verify coverage.
+- **Runbooks & Manual Change Control**: Reference the runbook sections to update, the evidence artifacts to capture, and review checkpoints that will close the loop.
 
 ## Project Structure
 
