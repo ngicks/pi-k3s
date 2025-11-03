@@ -16,9 +16,13 @@
   ansible.builtin.set_fact:
     k3s_cluster_init: "{{ inventory_hostname == groups['control_plane'][0] }}"
 
+- name: Determine primary control-plane host
+  ansible.builtin.set_fact:
+    k3s_primary_control_plane: "{{ groups['control_plane'][0] }}"
+
 - name: Calculate effective API endpoint
   ansible.builtin.set_fact:
-    k3s_effective_api_endpoint: "{{ k3s_api_endpoint | default(k3s_node_ip) }}"
+    k3s_effective_api_endpoint: "{{ k3s_api_endpoint | default(hostvars[k3s_primary_control_plane].inventory_hostname) }}"
 
 - name: Build TLS SAN entries
   ansible.builtin.set_fact:
@@ -46,12 +50,6 @@
     path: /usr/local/bin/k3s
   register: k3s_binary
 
-- name: Capture current k3s service ExecStart
-  ansible.builtin.command: "grep '^ExecStart=' /etc/systemd/system/k3s.service"
-  register: k3s_service_exec
-  failed_when: false
-  changed_when: false
-
 - name: Build k3s server exec arguments
   ansible.builtin.set_fact:
     k3s_server_exec_args: >-
@@ -62,14 +60,6 @@
         + (k3s_server_disable_components | map('regex_replace', '^(.*)$', '--disable \\1') | list)
       }}
 
-- name: Build desired k3s ExecStart line
-  ansible.builtin.set_fact:
-    k3s_server_exec_line: "ExecStart=/usr/local/bin/k3s {{ k3s_server_exec_args | join(' ') }}"
-
-- name: Determine if k3s installation needs to run
-  ansible.builtin.set_fact:
-    k3s_install_required: "{{ (not k3s_binary.stat.exists) or (k3s_service_exec.rc != 0) or (k3s_service_exec.stdout | default('') | trim != k3s_server_exec_line) }}"
-
 - name: Install k3s server
   ansible.builtin.shell: curl -sfL https://get.k3s.io | sh -
   environment:
@@ -79,11 +69,7 @@
     K3S_NODE_IP: "{{ k3s_node_ip }}"
     INSTALL_K3S_EXEC: "{{ k3s_server_exec_args | join(' ') }}"
     K3S_URL: "{{ ('https://' ~ k3s_effective_api_endpoint ~ ':6443') if not k3s_cluster_init else omit }}"
-    INSTALL_K3S_SKIP_DOWNLOAD: "{{ 'true' if k3s_binary.stat.exists else omit }}"
-    INSTALL_K3S_FORCE_RESTART: "{{ 'true' if k3s_binary.stat.exists else omit }}"
-  when: k3s_install_required
-  register: k3s_install_result
-  changed_when: k3s_install_result.rc == 0
+  when: not k3s_binary.stat.exists
 
 - name: Ensure k3s service is enabled
   ansible.builtin.systemd:
