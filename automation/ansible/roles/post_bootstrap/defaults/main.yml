@@ -1,3 +1,0 @@
-post_bootstrap_local_kubeconfig: "{{ lookup('env', 'KUBECONFIG') | default(lookup('env', 'HOME') ~ '/.kube/pi-k3s.yaml', true) }}"
-post_bootstrap_kubeconfig_owner: "{{ lookup('env', 'USER') | default('root') }}"
-post_bootstrap_wait_timeout: 180

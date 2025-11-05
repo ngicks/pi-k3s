@@ -69,6 +69,8 @@ description: "Task list for feature implementation"
 - [X] T009 [P] Capture secrets rotation checklist skeleton in `docs/runbooks/secrets-rotation.md`.
 - [X] T010 Record hardware/environment prerequisites in `docs/runbooks/hardware.md`.
 
+_Update 2025-11-04_: The custom `k3s_server`, `k3s_agent`, and `post_bootstrap` roles were replaced by the upstream `k3s-ansible` collection; only the `base_os` role remains.
+
 **Checkpoint**: Provisioning scaffolding ready; story-specific automation can proceed.
 
 ---
@@ -89,10 +91,10 @@ description: "Task list for feature implementation"
 ### Implementation for User Story 1
 
 - [X] T013 [P] [US1] Implement OS preparation tasks in `automation/ansible/roles/base_os/tasks/main.yml`.
-- [X] T014 [P] [US1] Implement control-plane install tasks in `automation/ansible/roles/k3s_server/tasks/main.yml`.
-- [X] T015 [P] [US1] Implement worker install tasks in `automation/ansible/roles/k3s_agent/tasks/main.yml`.
-- [X] T016 [US1] Implement kubeconfig retrieval and post-bootstrap steps in `automation/ansible/roles/post_bootstrap/tasks/main.yml`.
-- [X] T017 [US1] Wire roles with variables/handlers inside `automation/ansible/site.yml` for full-cluster apply.
+- [X] T014 [P] [US1] Implement control-plane install tasks in `automation/ansible/roles/k3s_server/tasks/main.yml` (superseded by k3s-ansible collection).
+- [X] T015 [P] [US1] Implement worker install tasks in `automation/ansible/roles/k3s_agent/tasks/main.yml` (superseded by k3s-ansible collection).
+- [X] T016 [US1] Implement kubeconfig retrieval and post-bootstrap steps in `automation/ansible/roles/post_bootstrap/tasks/main.yml` (superseded by k3s-ansible collection).
+- [X] T017 [US1] Wire roles with variables/handlers inside `automation/ansible/site.yml` for full-cluster apply (now imports `k3s.orchestration.site`).
 - [X] T018 [US1] Create baseline cluster manifests (namespaces, storage, RBAC) in `cluster/base/system/`.
 - [X] T019 [US1] Author operator bootstrap SOP in `docs/runbooks/bootstrap.md` referencing diff helper script.
 - [X] T020 [US1] Document manual apply workflow and evidence logging in `docs/governance/reviews/bootstrap-template.md`.
@@ -185,7 +187,7 @@ description: "Task list for feature implementation"
 
 - All Phase 1 tasks marked [P] can run in parallel (inventory config, requirements file).
 - Phase 2 tasks marked [P] can run in parallel (SOPS setup, diff helper, documentation scaffolds).
-- Within US1, parallelize role implementations (`base_os`, `k3s_server`, `k3s_agent`).
+- Within US1, parallelize base OS hardening updates and k3s-ansible integration work (inventory wiring, playbook imports).
 - Within US2, rebuild automation and documentation can progress concurrently once tags exist.
 - Within US3, Helm values, Loki manifests, and alert routes can be authored simultaneously after secrets workflow is finalized.
 

@@ -1,7 +1,7 @@
 <!--
 Sync Impact Report
-- Version change: draft → 1.0.0
-- Modified principles: n/a (initial issuance)
+- Version change: 1.0.0 → 1.0.1
+- Modified principles: I. GitOps Evidence & Traceability (clarified evidence archive requirements)
 - Added sections: none
 - Removed sections: none
 - Templates requiring updates: .specify/templates/plan-template.md ✅ updated, .specify/templates/spec-template.md ✅ updated, .specify/templates/tasks-template.md ✅ updated
@@ -14,7 +14,7 @@ Sync Impact Report
 ### I. GitOps Evidence & Traceability
 pi-k3s treats the repository as the single source of truth for infrastructure state.
 - Commit Ansible playbooks, Helm charts, Kubernetes manifests, and SOPS rules before any execution.
-- Capture and store `ansible-playbook --check`, `kubectl diff`, and `helm diff` output in `docs/governance/` prior to merging or applying changes.
+- Capture and store `ansible-playbook --check`, `kubectl diff`, and `helm diff` output under `docs/governance/reviews/<date>-<change>/` prior to merging or applying changes.
 - Reject manual cluster alterations that lack repository evidence or a governance log entry.
 **Rationale**: Enforcing GitOps discipline keeps the cluster observable, auditable, and recoverable.
 
@@ -57,10 +57,11 @@ Work proceeds in deliberate increments that preserve auditability.
 - Before execution, collect dry-run diffs (`ansible-playbook --check`, `kubectl diff`, `helm diff`) and link them to the change record.
 - Apply changes under operator observation, then update runbooks, quickstart steps, and governance logs with observed outcomes.
 - Schedule observability drills, secrets rotation, and rebuild exercises as tasks within feature plans to keep compliance continuous.
+- Archive diff artifacts and governance notes under `docs/governance/reviews/<date>-<change>/` and link them in the change record.
 - Submit compliance statements during reviews confirming that principles, operational constraints, and workflow steps were satisfied.
 
 ## Governance
 
-The constitution supersedes conflicting project guidance. Amendments require maintainer consensus recorded in `docs/governance/constitution-log.md`, including summary, rationale, affected principles, and evidence of a compliance review. Versioning follows semantic rules: MAJOR for removing or redefining principles, MINOR for adding principles or expanding operational requirements, PATCH for clarifications that do not change obligations. Every pull request must include a Constitution Check noting how work satisfies each principle; reviewers MUST block merges lacking evidence. A quarterly governance review validates observability drills, secrets rotation, rebuild compliance, and documentation freshness; findings feed back into runbooks and future specs.
+The constitution supersedes conflicting project guidance. Amendments require maintainer consensus recorded in `docs/governance/reviews/constitution-log.md`, including summary, rationale, affected principles, and evidence of a compliance review. Versioning follows semantic rules: MAJOR for removing or redefining principles, MINOR for adding principles or expanding operational requirements, PATCH for clarifications that do not change obligations. Every pull request must include a Constitution Check noting how work satisfies each principle; reviewers MUST block merges lacking evidence. A quarterly governance review validates observability drills, secrets rotation, rebuild compliance, and documentation freshness; findings feed back into runbooks and future specs.
 
-**Version**: 1.0.0 | **Ratified**: 2025-11-03 | **Last Amended**: 2025-11-03
+**Version**: 1.0.1 | **Ratified**: 2025-11-03 | **Last Amended**: 2025-11-04

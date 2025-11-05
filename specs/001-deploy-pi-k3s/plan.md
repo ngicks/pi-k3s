@@ -68,7 +68,7 @@ tests/
 └── automation/         # Idempotence or smoke tests for provisioning
 ```
 
-**Structure Decision**: Organize automation under `automation/ansible/` with roles for `base_os`, `k3s_server`, `k3s_agent`, and `post_bootstrap`. Kubernetes manifests reside in `cluster/base/` (namespace, monitoring, storage) and `cluster/apps/` (workload overlays). Operational documentation lives in `docs/runbooks/` and governance notes in `docs/governance/`. Tests persist in `tests/automation/` (Ansible smoke/idempotence) and `tests/k8s-diff/` (manifest drift).
+**Structure Decision**: Organize automation under `automation/ansible/` with a local `base_os` hardening role and the upstream `k3s-ansible` collection providing server/agent orchestration. Kubernetes manifests reside in `cluster/base/` (namespace, monitoring, storage) and `cluster/apps/` (workload overlays). Operational documentation lives in `docs/runbooks/` and governance notes in `docs/governance/`. Tests persist in `tests/automation/` (Ansible smoke/idempotence) and `tests/k8s-diff/` (manifest drift).
 
 ## Complexity Tracking
 
@@ -98,7 +98,7 @@ tests/
 2. Define operational contract (OpenAPI) for recording manual actions: bootstrap, rebuild, diff submission, alert acknowledgement.
 3. Define `uv` project configuration (`pyproject.toml` or `uv.lock`) documenting Python dependencies and virtual environment workflow.
 4. Draft `quickstart.md` covering workstation setup (kubectl, helm, uv-based Ansible env), secrets bootstrapping, and first cluster bootstrap walkthrough.
-5. Generate baseline Kubernetes manifest layout (directories, naming conventions) and map to automation roles.
+5. Generate baseline Kubernetes manifest layout (directories, naming conventions) and map to automation playbooks (base OS role + k3s-ansible collection).
 6. Update agent context via `.specify/scripts/bash/update-agent-context.sh codex` with new technologies (Ansible roles, SOPS-age workflow, kube-prometheus-stack).
 7. Re-run Constitution Check ensuring design artifacts demonstrate compliance; document outcomes in plan.
 

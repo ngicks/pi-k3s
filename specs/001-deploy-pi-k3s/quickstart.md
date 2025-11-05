@@ -44,7 +44,11 @@
    sops automation/ansible/group_vars/all/vault.sops.yml
    ```
    Add `k3s_sudo_password` inside the editor; SOPS will encrypt on save.
-8. Verify `kubectl` context is unset (will be configured after bootstrap).
+8. Install required collections (includes the upstream k3s provisioning playbook):
+   ```bash
+   ansible-galaxy collection install -r automation/ansible/requirements.yml
+   ```
+9. Verify `kubectl` context is unset (will be configured after bootstrap).
 
 ## 2. Flash and Configure Raspberry Pi Nodes
 1. Flash Raspberry Pi OS Lite 64-bit to each SSD/SD.
@@ -58,10 +62,10 @@
    sudo raspi-config nonint do_wait_for_network 1
    sudo reboot
    ```
-4. Update inventory in `automation/ansible/inventory/hosts.yml` with node IPs.
+4. Update `automation/ansible/inventory/hosts.yml` so each host entry has the correct static IP and `ansible_host`. Confirm the `api_endpoint`, `k3s_version`, and `token: "{{ vault_k3s_cluster_token }}"` settings under `k3s_cluster.vars` reflect your deployment.
 
 ## 3. Bootstrap Cluster with Ansible
-1. Dry-run playbook to confirm idempotence:
+1. Dry-run playbook to confirm base OS prep and k3s rollout are clean:
    ```bash
    ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/site.yml --check
    ```
@@ -69,7 +73,10 @@
    ```bash
    ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/site.yml
    ```
-3. Copy kubeconfig from server node 1 (Ansible task should retrieve automatically to `~/.kube/config`).
+3. The collection merges kubeconfig into the local context (default `k3s-ansible`). Switch contexts if needed:
+   ```bash
+   kubectl config use-context k3s-ansible
+   ```
 4. Test cluster access:
    ```bash
    kubectl get nodes -o wide

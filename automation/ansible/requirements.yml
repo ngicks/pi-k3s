@@ -1,4 +1,8 @@
 collections:
-  - name: community.sops
-    version: 2.2.6
-    source: https://galaxy.ansible.com
+  # hangs on installation. install by tar file. 
+  # - name: community.sops
+  #   version: 2.2.6
+  #   source: https://galaxy.ansible.com
+  - name: https://github.com/k3s-io/k3s-ansible.git
+    type: git
+    version: 1.1.0

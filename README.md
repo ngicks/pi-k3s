@@ -34,6 +34,14 @@ sops automation/ansible/group_vars/all/vault.sops.yml
 
 Add the `k3s_sudo_password` value inside the editor; SOPS will re-encrypt the file on save.
 
+Install required Ansible collections (includes the upstream `k3s-ansible` orchestration playbooks):
+
+```bash
+ansible-galaxy collection install -r automation/ansible/requirements.yml
+```
+
+Review `automation/ansible/inventory/hosts.yml` to confirm the `api_endpoint`, `k3s_version`, and node IP assignments match your environment. The `token` entry defaults to `{{ vault_k3s_cluster_token }}` and relies on the encrypted vault populated above.
+
 ## Secrets Management (age + SOPS)
 
 1. **Install tools** (Debian/Ubuntu example):

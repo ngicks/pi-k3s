@@ -20,7 +20,7 @@ description: "Task list template for feature implementation"
 
 **Constitution Compliance Tasks**  
 Add explicit tasks covering:
-- GitOps evidence capture (`docs/governance/` updates, diff artifact commits)
+- GitOps evidence capture (archive `docs/governance/reviews/<date>-<change>/` updates, diff artifact commits)
 - Rebuild automation validation (Ansible checks, drill execution, runbook refresh)
 - Secrets rotation or SOPS recipient updates with audit logging
 - Observability instrumentation and synthetic alert drills

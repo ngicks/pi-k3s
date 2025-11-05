@@ -7,10 +7,8 @@ Establish a reproducible procedure for provisioning the pi-k3s control-plane and
 - Operators have access to this repository and have pulled the latest `001-deploy-pi-k3s` branch.
 - Workstation environment prepared per `specs/001-deploy-pi-k3s/quickstart.md` (uv virtualenv active, `ansible-playbook`, `kubectl`, `helm`, `age`, `sops` installed).
 - `automation/ansible/group_vars/all/vault.sops.yaml` contains `vault_k3s_cluster_token` and any sensitive credentials.
-- Environment variables:
-  - `export K3S_SSH_USER=<remote_username>`
-  - `export K3S_API_ENDPOINT=<control-plane load balancer or primary server address>`
-  - `export K3S_CLUSTER_TOKEN=$(sops -d --extract '["vault_k3s_cluster_token"]' automation/ansible/group_vars/all/vault.sops.yaml)`
+- `automation/ansible/inventory/hosts.yml` is up to date with static IPs, the desired `k3s_version`, and `api_endpoint`. The `token` entry should reference `{{ vault_k3s_cluster_token }}` from the encrypted vault.
+- Environment variable: `export K3S_SSH_USER=<remote_username>`
 
 ## Step 1: Dry-Run Automation
 1. Activate the virtual environment (`source .venv/bin/activate`).
@@ -21,14 +19,15 @@ Establish a reproducible procedure for provisioning the pi-k3s control-plane and
 3. Review the output; resolve any reported changes or failures before proceeding.
 
 ## Step 2: Execute Ansible Bootstrap
-1. Run the full playbook to prepare control-plane nodes, workers, and post-bootstrap tasks:
+1. Run the full playbook to apply base OS tweaks and invoke the upstream `k3s.orchestration.site` playbook:
    ```bash
    ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/site.yml
    ```
 2. Monitor output for host reboots (triggered when kernel parameters change) and rerun the playbook after reboot if required.
-3. Confirm the generated kubeconfig at `~/.kube/pi-k3s.yaml`. Update your shell context:
+3. Confirm kubeconfig context availability (defaults to `k3s-ansible`). Update your shell context if necessary:
    ```bash
-   export KUBECONFIG=~/.kube/pi-k3s.yaml
+   kubectl config use-context k3s-ansible
+   export KUBECONFIG=${KUBECONFIG:-~/.kube/config}
    kubectl get nodes -o wide
    ```
 

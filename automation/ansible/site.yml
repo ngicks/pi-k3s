@@ -1,22 +1,8 @@
-- name: Prepare control-plane nodes
-  hosts: control_plane
+- name: Prepare k3s nodes
+  hosts: k3s_cluster
   become: true
   serial: 1
   roles:
     - base_os
-    - k3s_server
 
-- name: Prepare worker nodes
-  hosts: workers
-  become: true
-  serial: 2
-  roles:
-    - base_os
-    - k3s_agent
-
-- name: Post-bootstrap tasks
-  hosts: control_plane[0]
-  become: true
-  run_once: true
-  roles:
-    - post_bootstrap
+- import_playbook: k3s.orchestration.site
