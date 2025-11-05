@@ -1,0 +1,14 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    {{ static_interface_effective }}:
+      dhcp4: false
+      addresses:
+        - {{ static_ipv4 }}
+      gateway4: {{ default_gateway }}
+      nameservers:
+        addresses:
+{% for dns in static_dns %}
+          - {{ dns }}
+{% endfor %}

@@ -65,13 +65,13 @@
 4. Update `automation/ansible/inventory/hosts.yml` so each host entry has the correct static IP and `ansible_host`. Confirm the `api_endpoint`, `k3s_version`, and `token: "{{ vault_k3s_cluster_token }}"` settings under `k3s_cluster.vars` reflect your deployment.
 
 ## 3. Bootstrap Cluster with Ansible
-1. Dry-run playbook to confirm base OS prep and k3s rollout are clean:
+1. Dry-run playbook to confirm base OS prep, static networking, and k3s rollout are clean:
    ```bash
-   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/site.yml --check
+   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/host-os-ubuntu.yaml --check
    ```
 2. Execute full run:
    ```bash
-   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/site.yml
+   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/host-os-ubuntu.yaml
    ```
 3. The collection merges kubeconfig into the local context (default `k3s-ansible`). Switch contexts if needed:
    ```bash
@@ -113,7 +113,7 @@
 1. Power-cycle node 4 and reimage storage.
 2. Execute Ansible playbook targeting node 4:
    ```bash
-   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/site.yml --limit pi-cluster-4.local
+   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/host-os-ubuntu.yaml --limit pi-cluster-4.local
    ```
 3. Ensure node returns to Ready state within 60 minutes and workloads reschedule correctly.
 4. Capture duration metrics and update runbook checklist.

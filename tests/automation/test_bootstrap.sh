@@ -4,7 +4,7 @@ set -euo pipefail
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-PLAYBOOK="${PLAYBOOK:-automation/ansible/site.yml}"
+PLAYBOOK="${PLAYBOOK:-automation/ansible/host-os-ubuntu.yaml}"
 INVENTORY="${INVENTORY:-automation/ansible/inventory/hosts.yml}"
 
 if ! command -v ansible-playbook >/dev/null 2>&1; then

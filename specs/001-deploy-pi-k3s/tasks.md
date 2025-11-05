@@ -63,7 +63,7 @@ description: "Task list for feature implementation"
 **Purpose**: Ensure automation scaffolding, secrets handling, and manual diff capture exist before story work.
 
 - [X] T005 Create role scaffolding (`tasks/`, `handlers/`, `templates/`) for `base_os`, `k3s_server`, `k3s_agent`, and `post_bootstrap` under `automation/ansible/roles/`.
-- [X] T006 [P] Stub playbook entry points in `automation/ansible/site.yml` with plays targeting control-plane and worker groups.
+- [X] T006 [P] Stub playbook entry points in `automation/ansible/host-os-ubuntu.yaml` (base hardening + static network) and `automation/ansible/k3s.yaml` (collection orchestration).
 - [X] T007 [P] Configure repository-wide SOPS policy in `.sops.yaml` covering `cluster/` and `docs/governance/`.
 - [X] T008 [P] Add diff collection helper script `automation/scripts/collect-diff.sh` that wraps `kubectl diff`/`helm diff` and stores artifacts under `docs/governance/reviews/`.
 - [X] T009 [P] Capture secrets rotation checklist skeleton in `docs/runbooks/secrets-rotation.md`.
@@ -94,7 +94,7 @@ _Update 2025-11-04_: The custom `k3s_server`, `k3s_agent`, and `post_bootstrap` 
 - [X] T014 [P] [US1] Implement control-plane install tasks in `automation/ansible/roles/k3s_server/tasks/main.yml` (superseded by k3s-ansible collection).
 - [X] T015 [P] [US1] Implement worker install tasks in `automation/ansible/roles/k3s_agent/tasks/main.yml` (superseded by k3s-ansible collection).
 - [X] T016 [US1] Implement kubeconfig retrieval and post-bootstrap steps in `automation/ansible/roles/post_bootstrap/tasks/main.yml` (superseded by k3s-ansible collection).
-- [X] T017 [US1] Wire roles with variables/handlers inside `automation/ansible/site.yml` for full-cluster apply (now imports `k3s.orchestration.site`).
+- [X] T017 [US1] Wire roles with variables/handlers inside `automation/ansible/host-os-ubuntu.yaml` for full-cluster apply (importing `k3s.yaml`).
 - [X] T018 [US1] Create baseline cluster manifests (namespaces, storage, RBAC) in `cluster/base/system/`.
 - [X] T019 [US1] Author operator bootstrap SOP in `docs/runbooks/bootstrap.md` referencing diff helper script.
 - [X] T020 [US1] Document manual apply workflow and evidence logging in `docs/governance/reviews/bootstrap-template.md`.
@@ -116,7 +116,7 @@ _Update 2025-11-04_: The custom `k3s_server`, `k3s_agent`, and `post_bootstrap` 
 
 ### Implementation for User Story 2
 
-- [ ] T023 [P] [US2] Add rebuild play targeting `pi-cluster-4.local` with tags in `automation/ansible/site.yml`.
+- [ ] T023 [P] [US2] Add rebuild play targeting `pi-cluster-4.local` with tags in `automation/ansible/host-os-ubuntu.yaml`.
 - [ ] T024 [P] [US2] Implement rebuild-specific tasks and handlers in `automation/ansible/roles/k3s_agent/tasks/rebuild.yml`.
 - [ ] T025 [US2] Create rebuild automation wrapper `automation/scripts/rebuild-node.sh` measuring elapsed time.
 - [ ] T026 [US2] Capture detailed rebuild runbook in `docs/runbooks/rebuild-node.md` with validation checklist.
@@ -198,7 +198,7 @@ _Update 2025-11-04_: The custom `k3s_server`, `k3s_agent`, and `post_bootstrap` 
 ```bash
 # Launch dry-run checks for User Story 1 together (if requested):
 Task: "Run kubectl diff for cluster/base/system/"
-Task: "Run ansible-playbook --check automation/ansible/site.yml"
+Task: "Run ansible-playbook --check automation/ansible/host-os-ubuntu.yaml"
 
 # Launch all observability updates for User Story 1 together:
 Task: "Validate manifest diff via tests/k8s-diff/test_baseline.sh"

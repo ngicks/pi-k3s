@@ -1,0 +1,85 @@
+---
+- name: Assert aug 
+  ansible.builtin.assert:
+    that: 
+      - static_ipv4 is defined 
+      - static_ipv4 != '' 
+
+- name: Locate existing netplan configuration
+  ansible.builtin.find:
+    paths: /sys/class/net
+    patterns: "e*"
+    file_type: any
+  register: net_class_find 
+
+- name: Locate existing netplan configuration
+  ansible.builtin.find:
+    paths: /etc/netplan
+    patterns: "*.yaml"
+    file_type: file
+  register: netplan_find
+  when: static_ipv4 is defined
+
+- name: Choose primary netplan file
+  ansible.builtin.set_fact:
+    netplan_source: "{{ (netplan_find.files | sort(attribute='path'))[0].path }}"
+  when:
+    - static_ipv4 is defined
+    - netplan_find.files | length > 0
+
+- name: Load existing netplan configuration
+  ansible.builtin.slurp:
+    src: "{{ netplan_source }}"
+  register: netplan_raw
+  when:
+    - static_ipv4 is defined
+    - netplan_source is defined
+
+- name: Parse netplan configuration
+  ansible.builtin.set_fact:
+    netplan_config: "{{ netplan_raw.content | b64decode | from_yaml }}"
+  when:
+    - static_ipv4 is defined
+    - netplan_raw is defined
+
+- name: Determine existing netplan interfaces
+  ansible.builtin.set_fact:
+    netplan_interfaces: "{{ (netplan_config.network.ethernets | default({})).keys() | list }}"
+  when:
+    - static_ipv4 is defined
+    - netplan_config is defined
+
+- name: Compute static network settings
+  ansible.builtin.set_fact:
+    static_interface_effective: "{{ static_interface | default((netplan_interfaces | default([]))[0] if (netplan_interfaces | default([]) | length > 0)) }}"
+  when: static_ipv4 is defined
+
+- name: "[Debug] display values"
+  ansible.builtin.debug:
+    msg: >-
+      iface: {{ static_interface_effective }}
+      static_dns: {{ static_dns }}
+      static_ipv4: {{ static_ipv4 }}
+
+- name: Assert values
+  ansible.builtin.assert:
+    that: 
+      - static_interface_effective is defined
+      - static_interface_effective != ''
+      - static_dns  != ''
+      - static_ipv4 != '' 
+
+
+- name: Render netplan configuration for {{ static_interface_effective }}
+  ansible.builtin.template:
+    src: netplan-static.yaml.j2
+    dest: "/etc/netplan/99-k3s-static-{{ static_interface_effective }}.yaml"
+    owner: root
+    group: root
+    mode: "0644"
+  when: static_ipv4 is defined
+  register: netplan_template
+
+- name: Record netplan change status
+  ansible.builtin.set_fact:
+    netplan_changed: "{{ (netplan_template is defined) and netplan_template.changed }"

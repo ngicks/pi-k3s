@@ -1,3 +1,13 @@
-k3s_static_router: 192.168.10.1
-k3s_static_dns:
+nodes:
+  dns-node-1: 192.168.10.254/24
+  # reserved-node:  192.168.10.253/24
+  # reserved-node:  192.168.10.252/24
+  # reserved-node:  192.168.10.251/24
+  cluster-node-1: 192.168.10.250/24
+  cluster-node-2: 192.168.10.249/24
+  cluster-node-3: 192.168.10.248/24
+  cluster-node-4: 192.168.10.247/24
+# unused: name varies but you may want to override.
+# static_interface: eth0
+static_dns:
   - 192.168.10.1

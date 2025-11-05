@@ -42,6 +42,15 @@ ansible-galaxy collection install -r automation/ansible/requirements.yml
 
 Review `automation/ansible/inventory/hosts.yml` to confirm the `api_endpoint`, `k3s_version`, and node IP assignments match your environment. The `token` entry defaults to `{{ vault_k3s_cluster_token }}` and relies on the encrypted vault populated above.
 
+Bootstrap the cluster with:
+
+```bash
+ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/host-os-ubuntu.yaml --check
+ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/host-os-ubuntu.yaml
+```
+
+Use `automation/ansible/k3s.yaml` if you need to rerun only the k3s orchestration layer after hosts are prepared.
+
 ## Secrets Management (age + SOPS)
 
 1. **Install tools** (Debian/Ubuntu example):

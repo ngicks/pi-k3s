@@ -19,9 +19,13 @@ Establish a reproducible procedure for provisioning the pi-k3s control-plane and
 3. Review the output; resolve any reported changes or failures before proceeding.
 
 ## Step 2: Execute Ansible Bootstrap
-1. Run the full playbook to apply base OS tweaks and invoke the upstream `k3s.orchestration.site` playbook:
+1. Run the combined host preparation + k3s playbook (`host-os-ubuntu.yaml` wraps base hardening, static networking, and `k3s.yaml`):
    ```bash
-   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/site.yml
+   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/host-os-ubuntu.yaml
+   ```
+   To rerun only the k3s orchestration without base OS changes, execute:
+   ```bash
+   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/k3s.yaml
    ```
 2. Monitor output for host reboots (triggered when kernel parameters change) and rerun the playbook after reboot if required.
 3. Confirm kubeconfig context availability (defaults to `k3s-ansible`). Update your shell context if necessary:

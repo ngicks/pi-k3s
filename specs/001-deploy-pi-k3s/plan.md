@@ -68,7 +68,7 @@ tests/
 └── automation/         # Idempotence or smoke tests for provisioning
 ```
 
-**Structure Decision**: Organize automation under `automation/ansible/` with a local `base_os` hardening role and the upstream `k3s-ansible` collection providing server/agent orchestration. Kubernetes manifests reside in `cluster/base/` (namespace, monitoring, storage) and `cluster/apps/` (workload overlays). Operational documentation lives in `docs/runbooks/` and governance notes in `docs/governance/`. Tests persist in `tests/automation/` (Ansible smoke/idempotence) and `tests/k8s-diff/` (manifest drift).
+**Structure Decision**: Organize automation under `automation/ansible/` with local roles for `base_os` hardening and `static_network` netplan management, and rely on the upstream `k3s-ansible` collection for server/agent orchestration. Kubernetes manifests reside in `cluster/base/` (namespace, monitoring, storage) and `cluster/apps/` (workload overlays). Operational documentation lives in `docs/runbooks/` and governance notes in `docs/governance/`. Tests persist in `tests/automation/` (Ansible smoke/idempotence) and `tests/k8s-diff/` (manifest drift).
 
 ## Complexity Tracking
 
