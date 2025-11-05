@@ -36,6 +36,7 @@
 - **Least-Privilege Secrets & Access Governance**: Confirm secrets stay SOPS-encrypted, list new age recipients or credential rotations, and note governance log updates.
 - **Observability & Alerting Validation**: Identify telemetry additions, kube-prometheus-stack or Loki adjustments, and the synthetic alert drill that will verify coverage.
 - **Runbooks & Manual Change Control**: Reference the runbook sections to update, the evidence artifacts to capture, and review checkpoints that will close the loop.
+- **Serena Knowledge Stewardship**: Specify the `.specify/templates` documents and `.specify/memory/` entries that will be updated so reviewers can audit knowledge capture with infrastructure evidence.
 
 ## Project Structure
 

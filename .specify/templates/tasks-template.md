@@ -25,6 +25,7 @@ Add explicit tasks covering:
 - Secrets rotation or SOPS recipient updates with audit logging
 - Observability instrumentation and synthetic alert drills
 - Runbook updates and review sign-off for manual change control
+- Serena knowledge capture (update `.specify/templates` outputs and `.specify/memory/` entries with traceable governance links)
 
 ## Path Conventions
 

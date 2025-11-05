@@ -1,15 +1,12 @@
 ---
 - name: Configure static networking for all nodes
-  hosts: static_network
+  hosts: static_network_configuration
   become: true
   gather_facts: false
   tasks:
     - name: Apply netplan static configuration
       ansible.builtin.include_role:
         name: static_network
-
-    - name: Flush handlers
-      ansible.builtin.meta: flush_handlers
 
     - name: Reboot if netplan was changed
       ansible.builtin.reboot:

@@ -1,9 +1,10 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 → 1.0.1
-- Modified principles: I. GitOps Evidence & Traceability (clarified evidence archive requirements)
+- Version change: 1.0.1 → 1.1.0
+- Modified principles: none
 - Added sections: none
 - Removed sections: none
+- Modified sections: Development & Operations Workflow (added Serena knowledge stewardship clause), Governance (mandated Serena tooling compliance)
 - Templates requiring updates: .specify/templates/plan-template.md ✅ updated, .specify/templates/spec-template.md ✅ updated, .specify/templates/tasks-template.md ✅ updated
 - Follow-up TODOs: none
 -->
@@ -58,10 +59,11 @@ Work proceeds in deliberate increments that preserve auditability.
 - Apply changes under operator observation, then update runbooks, quickstart steps, and governance logs with observed outcomes.
 - Schedule observability drills, secrets rotation, and rebuild exercises as tasks within feature plans to keep compliance continuous.
 - Archive diff artifacts and governance notes under `docs/governance/reviews/<date>-<change>/` and link them in the change record.
+- Capture knowledge updates through Serena-managed templates (`.specify/templates`) and write back to `.specify/memory/` so automation and operators share a single source of procedural truth.
 - Submit compliance statements during reviews confirming that principles, operational constraints, and workflow steps were satisfied.
 
 ## Governance
 
-The constitution supersedes conflicting project guidance. Amendments require maintainer consensus recorded in `docs/governance/reviews/constitution-log.md`, including summary, rationale, affected principles, and evidence of a compliance review. Versioning follows semantic rules: MAJOR for removing or redefining principles, MINOR for adding principles or expanding operational requirements, PATCH for clarifications that do not change obligations. Every pull request must include a Constitution Check noting how work satisfies each principle; reviewers MUST block merges lacking evidence. A quarterly governance review validates observability drills, secrets rotation, rebuild compliance, and documentation freshness; findings feed back into runbooks and future specs.
+The constitution supersedes conflicting project guidance. Amendments require maintainer consensus recorded in `docs/governance/reviews/constitution-log.md`, including summary, rationale, affected principles, and evidence of a compliance review. Versioning follows semantic rules: MAJOR for removing or redefining principles, MINOR for adding principles or expanding operational requirements, PATCH for clarifications that do not change obligations. Every pull request must include a Constitution Check noting how work satisfies each principle; reviewers MUST block merges lacking evidence. A quarterly governance review validates observability drills, secrets rotation, rebuild compliance, and documentation freshness; findings feed back into runbooks and future specs. Serena MCP must record constitution-aligned updates: operators log decisions and template changes via `.specify/memory/` so reviewers can audit knowledge stewardship alongside infrastructure evidence.
 
-**Version**: 1.0.1 | **Ratified**: 2025-11-03 | **Last Amended**: 2025-11-04
+**Version**: 1.1.0 | **Ratified**: 2025-11-03 | **Last Amended**: 2025-11-05

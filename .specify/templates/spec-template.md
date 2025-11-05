@@ -89,6 +89,7 @@ For each item below, describe the concrete artifacts this feature will deliver:
 - Least-Privilege Secrets & Access Governance (SOPS-encrypted assets, credential rotations, audit evidence)
 - Observability & Alerting Validation (telemetry changes, monitoring assets, drill plan)
 - Runbooks & Manual Change Control (documentation touchpoints, evidence capture, review checkpoints)
+- Serena Knowledge Stewardship (Serena memory updates, `.specify/templates` references, and links to governance logs for knowledge changes)
 
 ### Functional Requirements
 
