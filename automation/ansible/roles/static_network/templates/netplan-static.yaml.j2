@@ -1,11 +1,11 @@
 network:
   version: 2
   ethernets:
-    {{ static_interface_effective }}:
+    {{ target_interface }}:
       dhcp4: false
       addresses:
         - {{ static_ipv4 }}
-      gateway4: {{ default-gateway }}
+      gateway4: {{ local_gateway }}
       nameservers:
         addresses:
 {% for dns in static_dns %}

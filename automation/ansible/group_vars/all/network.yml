@@ -9,6 +9,7 @@ nodes:
   cluster-node-4: 192.168.10.247/24
 # unused: name varies but you may want to override.
 # static_interface: eth0
-default-gateway: 192.168.10.1
+local_gateway: 192.168.10.1
+local_broadcast: 192.168.10.255
 static_dns:
   - 192.168.10.1

@@ -8,38 +8,28 @@
     fail_msg: "static_ipv4 must be defined (CIDR format, e.g. 192.168.10.10/24)."
 
 - name: Gather current IPv4 interface assignments
-  ansible.builtin.command: ip -4 -j addr
-  register: static_ip_addr_output
+  ansible.builtin.command: ip -4 -j a
+  register: ip_4_j_a 
   changed_when: false
 
-- name: Parse IPv4 interface assignments
+- name: Find matching interface
   ansible.builtin.set_fact:
-    static_ipv4_interfaces_raw: "{{ (static_ip_addr_output.stdout | default('[]')) | from_json }}"
+    target_interface: "{{ item.ifname }}"
+  when: item.addr_info | selectattr('broadcast', 'defined') | selectattr('broadcast', 'equalto', target_broadcast) | list | length > 0
+  loop: "{{ ip_4_j_a.stdout | from_json }}"
+  vars:
+    target_broadcast: "{{ local_broadcast }}"
 
-- name: Build interface candidate list
-  ansible.builtin.set_fact:
-    static_interface_candidates: >-
-      {{
-        static_ipv4_interfaces_raw
-        | selectattr('ifname', 'defined')
-        | rejectattr('ifname', 'equalto', 'lo')
-        | map(attribute='ifname')
-        | unique
-        | list
-      }}
+- name: Ensure target_interface is found
+  ansible.builtin.assert:
+    that:
+      - target_interface is defined
+      - "(target_interface | string | length) >= 3"
 
-- name: Derive effective interface name
-  ansible.builtin.set_fact:
-    static_interface_effective: >-
-      {{
-        static_interface
-        | default((static_interface_candidates | default([])) | first, true)
-      }}
-
-- name: Render netplan configuration for {{ static_interface_effective }}
+- name: Render netplan configuration for {{ target_interface }}
   ansible.builtin.template:
     src: netplan-static.yaml.j2
-    dest: "/etc/netplan/99-k3s-static-{{ static_interface_effective }}.yaml"
+    dest: "/etc/netplan/99-k3s-static-{{ target_interface }}.yaml"
     owner: root
     group: root
     mode: "0600"
