@@ -1,0 +1,6 @@
+---
+- name: Update and prepare Ubuntu hosts
+  hosts: static_network 
+  become: true
+  roles:
+    - host_os_apt 

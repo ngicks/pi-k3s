@@ -1,0 +1,59 @@
+# Unbound configuration for pi-k3s internal DNS
+# Managed by Ansible - DO NOT EDIT MANUALLY
+# Variables sourced from group_vars/all/network.yml
+
+server:
+    # Logging
+    verbosity: 1
+    use-syslog: yes
+    log-queries: yes
+    log-replies: yes
+    log-local-actions: yes
+
+    # Network interface and ports
+    interface: 0.0.0.0
+    port: 53
+    do-ip4: yes
+    do-ip6: no
+    do-udp: yes
+    do-tcp: yes
+
+    # Access control
+    access-control: 192.168.10.0/24 allow
+    access-control: 127.0.0.0/8 allow
+
+    # Performance tuning for Raspberry Pi
+    num-threads: 2
+    msg-cache-slabs: 2
+    rrset-cache-slabs: 2
+    infra-cache-slabs: 2
+    key-cache-slabs: 2
+
+    # Cache settings
+    cache-min-ttl: 300
+    cache-max-ttl: 86400
+
+    # Round-robin for HA records
+    rrset-roundrobin: yes
+
+    # Privacy and security
+    hide-identity: yes
+    hide-version: yes
+    harden-glue: yes
+    harden-dnssec-stripped: yes
+    use-caps-for-id: yes
+
+    # Local data override for private zones
+    private-domain: "{{ dns_domain }}"
+    private-address: 192.168.0.0/16
+    private-address: 10.0.0.0/8
+    private-address: 172.16.0.0/12
+
+    # Do not query upstream for local domain
+    local-zone: "{{ dns_domain }}." static
+    local-zone: "10.168.192.in-addr.arpa." static
+
+# Forward queries for external domains to upstream DNS (router)
+forward-zone:
+    name: "."
+    forward-addr: {{ local_gateway }}

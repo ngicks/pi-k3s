@@ -11,5 +11,9 @@ nodes:
 # static_interface: eth0
 local_gateway: 192.168.10.1
 local_broadcast: 192.168.10.255
+# DNS servers: internal DNS first, router as fallback
 static_dns:
-  - 192.168.10.1
+  - 192.168.10.254  # internal_dns (Unbound)
+  - 192.168.10.1    # router fallback
+# DNS domain for the cluster (RFC 8375 compliant for home networks)
+dns_domain: home.arpa

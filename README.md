@@ -42,6 +42,33 @@ ansible-galaxy collection install -r automation/ansible/requirements.yml
 
 Review `automation/ansible/inventory/hosts.yml` to confirm the `api_endpoint`, `k3s_version`, and node IP assignments match your environment. The `token` entry defaults to `{{ vault_k3s_cluster_token }}` and relies on the encrypted vault populated above.
 
+## Internal DNS Setup
+
+The cluster uses an internal DNS server (`dns-internal-1.home.arpa` at 192.168.10.254) running Unbound to provide:
+- DNS resolution for cluster nodes using the `.home.arpa` domain (RFC 8375 compliant)
+- HA round-robin DNS for `k3s-api.home.arpa` (points to control plane nodes 1-3)
+- Wildcard DNS for ingress: `*.apps.home.arpa`
+
+**Provision the DNS server before bootstrapping the cluster**:
+
+```bash
+# Configure static network for DNS server
+ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/network.yaml --limit internal_dns --check
+ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/network.yaml --limit internal_dns
+
+# Deploy Unbound DNS server
+ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/dns.yaml --check
+ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/dns.yaml
+
+# Update all cluster nodes to use internal DNS
+ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/network.yaml --check
+ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/network.yaml
+```
+
+See `docs/runbooks/dns-setup.md` for detailed DNS operations and troubleshooting.
+
+## Cluster Bootstrap
+
 Bootstrap the cluster with:
 
 ```bash

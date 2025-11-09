@@ -1,0 +1,119 @@
+---
+# Tasks for internal_dns role - Unbound DNS server setup
+
+- name: Install Unbound DNS server
+  ansible.builtin.apt:
+    name:
+      - unbound
+      - dns-root-data
+      - dnsutils
+    state: present
+    update_cache: true
+  become: true
+
+- name: Check if systemd-resolved is running
+  ansible.builtin.systemd:
+    name: systemd-resolved
+  register: systemd_resolved_status
+  become: true
+  failed_when: false
+
+- name: Disable systemd-resolved to free port 53
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    enabled: false
+    state: stopped
+  become: true
+  when: systemd_resolved_status.status.ActiveState == "active"
+
+- name: Remove systemd-resolved stub listener
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: '^#?DNSStubListener='
+    line: 'DNSStubListener=no'
+    state: present
+  become: true
+  when: systemd_resolved_status.status.ActiveState == "active"
+
+- name: Ensure Unbound configuration directory exists
+  ansible.builtin.file:
+    path: /etc/unbound/unbound.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Deploy main Unbound configuration
+  ansible.builtin.template:
+    src: unbound.conf.j2
+    dest: /etc/unbound/unbound.conf.d/pi-k3s.conf
+    owner: root
+    group: root
+    mode: '0644'
+    validate: 'unbound-checkconf %s'
+  become: true
+  notify:
+    - restart unbound
+
+- name: Deploy local forward DNS zone configuration
+  ansible.builtin.template:
+    src: local-zone.conf.j2
+    dest: /etc/unbound/unbound.conf.d/local-zone.conf
+    owner: root
+    group: root
+    mode: '0644'
+    validate: 'unbound-checkconf %s'
+  become: true
+  notify:
+    - restart unbound
+
+- name: Deploy reverse DNS zone configuration
+  ansible.builtin.template:
+    src: reverse-zone.conf.j2
+    dest: /etc/unbound/unbound.conf.d/reverse-zone.conf
+    owner: root
+    group: root
+    mode: '0644'
+    validate: 'unbound-checkconf %s'
+  become: true
+  notify:
+    - restart unbound
+
+- name: Ensure Unbound service is enabled and started
+  ansible.builtin.systemd:
+    name: unbound
+    enabled: true
+    state: started
+  become: true
+
+- name: Wait for Unbound to be ready on localhost
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: 53
+    timeout: 30
+    state: started
+
+- name: Wait for Unbound to be ready on external interface
+  ansible.builtin.wait_for:
+    host: "{{ nodes['dns-internal-1'] | regex_replace('/.*$', '') }}"
+    port: 53
+    timeout: 30
+    state: started
+  delegate_to: localhost
+
+- name: Validate DNS resolution for cluster node 1
+  ansible.builtin.command: "dig +short @{{ nodes['dns-internal-1'] | regex_replace('/.*$', '') }} pi-cluster-1.{{ dns_domain }}"
+  register: dns_validation
+  changed_when: false
+  failed_when: dns_validation.stdout != nodes['cluster-node-1'] | regex_replace('/.*$', '')
+
+- name: Validate HA DNS round-robin for k3s-api
+  ansible.builtin.command: "dig +short @{{ nodes['dns-internal-1'] | regex_replace('/.*$', '') }} k3s-api.{{ dns_domain }}"
+  register: k3s_api_validation
+  changed_when: false
+  failed_when: k3s_api_validation.stdout_lines | length != 3
+
+- name: Display DNS validation results
+  ansible.builtin.debug:
+    msg: "DNS server operational. k3s-api.{{ dns_domain }} resolves to {{ k3s_api_validation.stdout_lines | length }} IPs (HA round-robin enabled)"

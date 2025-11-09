@@ -18,7 +18,41 @@ Establish a reproducible procedure for provisioning the pi-k3s control-plane and
    ```
 3. Review the output; resolve any reported changes or failures before proceeding.
 
-## Step 2: Execute Ansible Bootstrap
+## Step 2: Provision Internal DNS Server
+1. Verify DNS server network configuration:
+   ```bash
+   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/network.yaml --limit internal_dns --check
+   ```
+2. Apply network configuration to DNS server if needed:
+   ```bash
+   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/network.yaml --limit internal_dns
+   ```
+3. Provision the internal DNS server (dry-run first):
+   ```bash
+   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/dns.yaml --check
+   ```
+4. Apply DNS configuration:
+   ```bash
+   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/dns.yaml
+   ```
+5. Validate DNS resolution from the DNS server:
+   ```bash
+   ssh dns-internal-1.home.arpa "dig @127.0.0.1 +short k3s-api.home.arpa"
+   # Should return 3 IPs: 192.168.10.250, 249, 248
+   ```
+6. Update all cluster nodes to use the internal DNS server:
+   ```bash
+   # Dry-run to review netplan changes
+   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/network.yaml --check
+
+   # Apply network changes (nodes may reboot if netplan changes)
+   ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/network.yaml
+   ```
+7. **Evidence**: Archive DNS setup output in `docs/governance/reviews/<date>-dns-setup/`
+
+For detailed DNS operations, see `docs/runbooks/dns-setup.md`.
+
+## Step 3: Execute Ansible Bootstrap
 1. Run the combined host preparation + k3s playbook (`host-os-ubuntu.yaml` wraps base hardening, static networking, and `k3s.yaml`):
    ```bash
    ansible-playbook -i automation/ansible/inventory/hosts.yml automation/ansible/host-os-ubuntu.yaml
@@ -35,7 +69,7 @@ Establish a reproducible procedure for provisioning the pi-k3s control-plane and
    kubectl get nodes -o wide
    ```
 
-## Step 3: Capture Baseline Diffs
+## Step 4: Capture Baseline Diffs
 1. Validate manifests before applying:
    ```bash
    tests/k8s-diff/test_baseline.sh
@@ -46,14 +80,14 @@ Establish a reproducible procedure for provisioning the pi-k3s control-plane and
    ```
 3. Ensure diff artifacts and command logs are committed with the change request.
 
-## Step 4: Apply Baseline Manifests
+## Step 5: Apply Baseline Manifests
 1. Apply namespaces, storage, and RBAC manifests:
    ```bash
    kubectl apply -f cluster/base/system/
    ```
 2. Record command output in `docs/governance/reviews/<date>-bootstrap.md` using the template referenced below.
 
-## Step 5: Post-Bootstrap Validation
+## Step 6: Post-Bootstrap Validation
 1. Verify all nodes are `Ready` and expected roles are present.
 2. Deploy kube-prometheus-stack per observability tasks once this runbook completes.
 3. Log bootstrap completion via the operations API (see `contracts/cluster-operations.openapi.yaml`) or by creating an entry in `docs/governance/reviews/<date>-bootstrap.md`.

@@ -1,0 +1,14 @@
+# Reverse DNS zone for 192.168.10.0/24 (10.168.192.in-addr.arpa)
+# Managed by Ansible - DO NOT EDIT MANUALLY
+# Variables sourced from group_vars/all/network.yml
+
+server:
+    # PTR records for cluster nodes
+    local-data-ptr: "{{ nodes['dns-internal-1'] | regex_replace('/.*$', '') }} dns-internal-1.{{ dns_domain }}"
+    local-data-ptr: "{{ nodes['cluster-node-1'] | regex_replace('/.*$', '') }} pi-cluster-1.{{ dns_domain }}"
+    local-data-ptr: "{{ nodes['cluster-node-2'] | regex_replace('/.*$', '') }} pi-cluster-2.{{ dns_domain }}"
+    local-data-ptr: "{{ nodes['cluster-node-3'] | regex_replace('/.*$', '') }} pi-cluster-3.{{ dns_domain }}"
+    local-data-ptr: "{{ nodes['cluster-node-4'] | regex_replace('/.*$', '') }} pi-cluster-4.{{ dns_domain }}"
+
+    # Note: HA service aliases (k3s-api, *.apps) do not have PTR records
+    # PTR records map IP -> hostname, not service aliases

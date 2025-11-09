@@ -1,0 +1,20 @@
+---
+# Handlers for internal_dns role
+
+- name: restart unbound
+  ansible.builtin.systemd:
+    name: unbound
+    state: restarted
+    enabled: true
+  become: true
+
+- name: reload unbound
+  ansible.builtin.systemd:
+    name: unbound
+    state: reloaded
+  become: true
+
+- name: validate unbound config
+  ansible.builtin.command: unbound-checkconf
+  become: true
+  changed_when: false

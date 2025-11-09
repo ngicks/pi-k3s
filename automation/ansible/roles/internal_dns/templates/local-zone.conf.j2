@@ -1,0 +1,31 @@
+# Forward DNS zone for {{ dns_domain }}
+# Managed by Ansible - DO NOT EDIT MANUALLY
+# Variables sourced from group_vars/all/network.yml
+
+server:
+    # Individual cluster node A records
+    # DNS server
+    local-data: "dns-internal-1.{{ dns_domain }}. IN A {{ nodes['dns-internal-1'] | regex_replace('/.*$', '') }}"
+
+    # Cluster nodes
+    local-data: "pi-cluster-1.{{ dns_domain }}. IN A {{ nodes['cluster-node-1'] | regex_replace('/.*$', '') }}"
+    local-data: "pi-cluster-2.{{ dns_domain }}. IN A {{ nodes['cluster-node-2'] | regex_replace('/.*$', '') }}"
+    local-data: "pi-cluster-3.{{ dns_domain }}. IN A {{ nodes['cluster-node-3'] | regex_replace('/.*$', '') }}"
+    local-data: "pi-cluster-4.{{ dns_domain }}. IN A {{ nodes['cluster-node-4'] | regex_replace('/.*$', '') }}"
+
+    # HA service aliases - round-robin across server nodes (1-3)
+    # k3s-api.{{ dns_domain }} - K3s API endpoint
+    local-data: "k3s-api.{{ dns_domain }}. IN A {{ nodes['cluster-node-1'] | regex_replace('/.*$', '') }}"
+    local-data: "k3s-api.{{ dns_domain }}. IN A {{ nodes['cluster-node-2'] | regex_replace('/.*$', '') }}"
+    local-data: "k3s-api.{{ dns_domain }}. IN A {{ nodes['cluster-node-3'] | regex_replace('/.*$', '') }}"
+
+    # *.apps.{{ dns_domain }} - Wildcard for ingress controller
+    # Note: Unbound doesn't support true wildcards in local-data, so we define
+    # the wildcard record explicitly. Applications will need to use specific subdomains.
+    local-data: "*.apps.{{ dns_domain }}. IN A {{ nodes['cluster-node-1'] | regex_replace('/.*$', '') }}"
+    local-data: "*.apps.{{ dns_domain }}. IN A {{ nodes['cluster-node-2'] | regex_replace('/.*$', '') }}"
+    local-data: "*.apps.{{ dns_domain }}. IN A {{ nodes['cluster-node-3'] | regex_replace('/.*$', '') }}"
+
+    # Additional common service aliases can be added here
+    # Example:
+    # local-data: "registry.{{ dns_domain }}. IN A {{ nodes['cluster-node-1'] | regex_replace('/.*$', '') }}"

@@ -2,6 +2,8 @@
 - name: Refresh apt cache
   ansible.builtin.apt:
     update_cache: true
+    upgrade: "safe"
+    autoclean: true
     cache_valid_time: 3600
 
 - name: Install base packages
@@ -29,33 +31,6 @@
     replace: '# \\1'
   notify: flag reboot required
 
-- name: Ensure kernel modules load file exists
-  ansible.builtin.copy:
-    dest: /etc/modules-load.d/k3s.conf
-    owner: root
-    group: root
-    mode: "0644"
-    content: |
-      br_netfilter
-      overlay
-
-- name: Load kernel modules required for k3s
-  ansible.builtin.modprobe:
-    name: "{{ item }}"
-    state: present
-  loop:
-    - br_netfilter
-    - overlay
-
-- name: Deploy k3s sysctl configuration
-  ansible.builtin.template:
-    src: sysctl.conf.j2
-    dest: /etc/sysctl.d/99-k3s.conf
-    owner: root
-    group: root
-    mode: "0644"
-  notify: reload sysctl
-
 - name: Ensure cgroup memory options present in cmdline.txt
   ansible.builtin.shell: |
     if ! grep -q "cgroup_memory=1" /boot/cmdline.txt; then
@@ -65,12 +40,4 @@
   register: cmdline_update
   changed_when: "'updated' in cmdline_update.stdout"
   notify: flag reboot required
-
-- name: Ensure kube directories exist
-  ansible.builtin.file:
-    path: /etc/rancher/k3s
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
 

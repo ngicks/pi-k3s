@@ -1,0 +1,42 @@
+---
+# Playbook: Internal DNS Server Setup
+# Purpose: Provision Unbound DNS server for pi-k3s cluster
+# Target: internal_dns group (192.168.10.254)
+# Domain: home.arpa (RFC 8375 compliant)
+
+- name: Setup Internal DNS Server
+  hosts: internal_dns
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Verify static network configuration
+      ansible.builtin.assert:
+        that:
+          - ansible_default_ipv4.address == "{{ nodes['dns-internal-1'] | regex_replace('/.*$', '') }}"
+        fail_msg: "DNS server must be configured at {{ nodes['dns-internal-1'] | regex_replace('/.*$', '') }}"
+        success_msg: "DNS server IP verified: {{ ansible_default_ipv4.address }}"
+
+    - name: Check connectivity to upstream DNS forwarder (router)
+      ansible.builtin.command: ping -c 2 {{ local_gateway }}
+      changed_when: false
+      failed_when: false
+      register: gateway_ping
+
+    - name: Display gateway connectivity status
+      ansible.builtin.debug:
+        msg: "Gateway {{ local_gateway }} is {{ 'reachable' if gateway_ping.rc == 0 else 'unreachable' }}"
+
+  roles:
+    - role: internal_dns
+
+  post_tasks:
+    - name: Display DNS server status
+      ansible.builtin.debug:
+        msg:
+          - "Internal DNS server setup complete"
+          - "DNS Domain: {{ dns_domain }}"
+          - "Listen Address: {{ nodes['dns-internal-1'] | regex_replace('/.*$', '') }}"
+          - "Forwarder: {{ local_gateway }}"
+          - "HA Services: k3s-api.{{ dns_domain }}, *.apps.{{ dns_domain }}"
+          - "Next Step: All cluster nodes will use this DNS after running network.yaml"
