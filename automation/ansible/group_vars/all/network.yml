@@ -1,5 +1,5 @@
 nodes:
-  dns-node-1: 192.168.10.254/24
+  dns-internal-1: 192.168.10.254/24
   # reserved-node:  192.168.10.253/24
   # reserved-node:  192.168.10.252/24
   # reserved-node:  192.168.10.251/24

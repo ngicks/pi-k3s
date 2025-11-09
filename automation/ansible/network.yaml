@@ -1,6 +1,6 @@
 ---
 - name: Configure static networking for all nodes
-  hosts: static_network_configuration
+  hosts: static_network
   become: true
   gather_facts: false
   tasks:
