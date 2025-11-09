@@ -19,12 +19,12 @@ server:
     local-data: "k3s-api.{{ dns_domain }}. IN A {{ nodes['cluster-node-2'] | regex_replace('/.*$', '') }}"
     local-data: "k3s-api.{{ dns_domain }}. IN A {{ nodes['cluster-node-3'] | regex_replace('/.*$', '') }}"
 
-    # *.apps.{{ dns_domain }} - Wildcard for ingress controller
-    # Note: Unbound doesn't support true wildcards in local-data, so we define
-    # the wildcard record explicitly. Applications will need to use specific subdomains.
-    local-data: "*.apps.{{ dns_domain }}. IN A {{ nodes['cluster-node-1'] | regex_replace('/.*$', '') }}"
-    local-data: "*.apps.{{ dns_domain }}. IN A {{ nodes['cluster-node-2'] | regex_replace('/.*$', '') }}"
-    local-data: "*.apps.{{ dns_domain }}. IN A {{ nodes['cluster-node-3'] | regex_replace('/.*$', '') }}"
+    # Wildcard zone for ingress: *.apps.{{ dns_domain }}
+    # Using redirect zone type so all subdomains (test.apps, foo.apps, etc.) resolve
+    local-zone: "apps.{{ dns_domain }}." redirect
+    local-data: "apps.{{ dns_domain }}. IN A {{ nodes['cluster-node-1'] | regex_replace('/.*$', '') }}"
+    local-data: "apps.{{ dns_domain }}. IN A {{ nodes['cluster-node-2'] | regex_replace('/.*$', '') }}"
+    local-data: "apps.{{ dns_domain }}. IN A {{ nodes['cluster-node-3'] | regex_replace('/.*$', '') }}"
 
     # Additional common service aliases can be added here
     # Example:

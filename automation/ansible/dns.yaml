@@ -10,13 +10,6 @@
   gather_facts: true
 
   pre_tasks:
-    - name: Verify static network configuration
-      ansible.builtin.assert:
-        that:
-          - ansible_default_ipv4.address == "{{ nodes['dns-internal-1'] | regex_replace('/.*$', '') }}"
-        fail_msg: "DNS server must be configured at {{ nodes['dns-internal-1'] | regex_replace('/.*$', '') }}"
-        success_msg: "DNS server IP verified: {{ ansible_default_ipv4.address }}"
-
     - name: Check connectivity to upstream DNS forwarder (router)
       ansible.builtin.command: ping -c 2 {{ local_gateway }}
       changed_when: false

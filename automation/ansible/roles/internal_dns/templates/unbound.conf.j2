@@ -52,6 +52,7 @@ server:
     # Do not query upstream for local domain
     local-zone: "{{ dns_domain }}." static
     local-zone: "10.168.192.in-addr.arpa." static
+    # Note: apps.{{ dns_domain }} zone is defined in local-zone.conf with redirect type
 
 # Forward queries for external domains to upstream DNS (router)
 forward-zone:

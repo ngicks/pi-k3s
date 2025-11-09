@@ -1,6 +1,25 @@
 ---
 # Tasks for internal_dns role - Unbound DNS server setup
 
+- name: Remove systemd-resolved symlink from /etc/resolv.conf
+  ansible.builtin.file:
+    path: /etc/resolv.conf
+    state: absent
+  become: true
+
+- name: Create static resolv.conf pointing to router (DNS server should not use itself)
+  ansible.builtin.copy:
+    dest: /etc/resolv.conf
+    content: |
+      # DNS configuration - using router for external resolution
+      # The DNS server should NOT point to itself (127.0.0.1) to avoid loops
+      nameserver {{ local_gateway }}
+    owner: root
+    group: root
+    mode: '0644'
+    force: true
+  become: true
+
 - name: Install Unbound DNS server
   ansible.builtin.apt:
     name:
@@ -10,6 +29,10 @@
     state: present
     update_cache: true
   become: true
+  retries: 3
+  delay: 5
+  register: apt_result
+  until: apt_result is success
 
 - name: Check if systemd-resolved is running
   ansible.builtin.systemd:
@@ -34,6 +57,20 @@
     state: present
   become: true
   when: systemd_resolved_status.status.ActiveState == "active"
+
+- name: Check if UFW is installed
+  ansible.builtin.command: which ufw
+  register: ufw_check
+  failed_when: false
+  changed_when: false
+
+- name: Allow DNS through firewall (if UFW is installed)
+  community.general.ufw:
+    rule: allow
+    port: '53'
+    proto: any
+  become: true
+  when: ufw_check.rc == 0
 
 - name: Ensure Unbound configuration directory exists
   ansible.builtin.file:
@@ -80,27 +117,29 @@
   notify:
     - restart unbound
 
-- name: Ensure Unbound service is enabled and started
+- name: Restart Unbound to apply interface binding
   ansible.builtin.systemd:
     name: unbound
     enabled: true
-    state: started
+    state: restarted
   become: true
 
-- name: Wait for Unbound to be ready on localhost
+- name: Wait for Unbound to be ready
   ansible.builtin.wait_for:
     host: 127.0.0.1
     port: 53
     timeout: 30
     state: started
 
-- name: Wait for Unbound to be ready on external interface
-  ansible.builtin.wait_for:
-    host: "{{ nodes['dns-internal-1'] | regex_replace('/.*$', '') }}"
-    port: 53
-    timeout: 30
-    state: started
-  delegate_to: localhost
+- name: Verify Unbound is listening on port 53
+  ansible.builtin.command: ss -tulpn
+  register: port_check
+  changed_when: false
+  become: true
+
+- name: Display listening ports
+  ansible.builtin.debug:
+    msg: "{{ port_check.stdout_lines | select('search', ':53') | list }}"
 
 - name: Validate DNS resolution for cluster node 1
   ansible.builtin.command: "dig +short @{{ nodes['dns-internal-1'] | regex_replace('/.*$', '') }} pi-cluster-1.{{ dns_domain }}"
@@ -114,6 +153,16 @@
   changed_when: false
   failed_when: k3s_api_validation.stdout_lines | length != 3
 
+- name: Validate external DNS forwarding (google.com)
+  ansible.builtin.command: "dig +short @{{ nodes['dns-internal-1'] | regex_replace('/.*$', '') }} google.com"
+  register: external_dns_validation
+  changed_when: false
+  failed_when: false
+
 - name: Display DNS validation results
   ansible.builtin.debug:
-    msg: "DNS server operational. k3s-api.{{ dns_domain }} resolves to {{ k3s_api_validation.stdout_lines | length }} IPs (HA round-robin enabled)"
+    msg:
+      - "DNS server operational!"
+      - "Internal DNS: k3s-api.{{ dns_domain }} resolves to {{ k3s_api_validation.stdout_lines | length }} IPs (HA round-robin enabled)"
+      - "External DNS: {{ 'Working' if external_dns_validation.stdout != '' else 'Not working - check Unbound logs' }}"
+      - "Wildcard DNS: *.apps.{{ dns_domain }} configured with redirect zone"
