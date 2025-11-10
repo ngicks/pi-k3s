@@ -29,7 +29,7 @@
   post_tasks:
     - name: Re-apply netplan configuration after prereq tasks
       ansible.builtin.command: netplan apply
-      when: inventory_hostname in groups['static_network']
+      when: not ansible_check_mode
       changed_when: false
 
 - name: Setup K3S server
