@@ -4,6 +4,16 @@
   gather_facts: true
   become: true
   tasks:
+    - name: Ensure .bashrc exists for ansible_user
+      ansible.builtin.file:
+        path: "/home/{{ sudo_user }}/.bashrc"
+        state: touch
+        mode: '0644'
+        owner: "{{ sudo_user }}"
+        group: "{{ sudo_user }}"
+        modification_time: preserve
+        access_time: preserve
+
     - name: Run prereq role
       ansible.builtin.include_role:
         name: k3s.orchestration.prereq
