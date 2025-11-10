@@ -5,9 +5,11 @@ network:
       dhcp4: false
       addresses:
         - {{ static_ipv4 }}
-      gateway4: {{ local_gateway }}
       nameservers:
         addresses:
 {% for dns in static_dns %}
           - {{ dns }}
 {% endfor %}
+      routes:
+        - to: default
+          via: {{ local_gateway }}
