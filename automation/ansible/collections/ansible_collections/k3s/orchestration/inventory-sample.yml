@@ -1,56 +1,32 @@
 ---
-all:
-  vars:
-    ansible_python_interpreter: /usr/bin/python3
-    ansible_port: 22
-    ansible_user: "{{ sudo_user }}"
-    ansible_become: true
-    ansible_become_method: sudo
-    ansible_become_password: "{{ sudo_password }}"
-static_network:
-  hosts:
-    dns-internal-1.local:
-      static_ipv4: "{{ nodes['dns-internal-1'] }}"
-    pi-cluster-1.local:
-      static_ipv4: "{{ nodes['cluster-node-1'] }}"
-    pi-cluster-2.local:
-      static_ipv4: "{{ nodes['cluster-node-2'] }}"
-    pi-cluster-3.local:
-      static_ipv4: "{{ nodes['cluster-node-3'] }}"
-    pi-cluster-4.local:
-      static_ipv4: "{{ nodes['cluster-node-4'] }}"
-internal_dns:
-  hosts:
-    dns-internal-1.local: {}
 k3s_cluster:
   children:
     server:
       hosts:
-        pi-cluster-1.home.arpa:
-          node_sans: "--tls-san pi-cluster-1.home.arpa --tls-san pi-cluster-1.local"
-        pi-cluster-2.home.arpa:
-          node_sans: "--tls-san pi-cluster-2.home.arpa --tls-san pi-cluster-2.local"
-        pi-cluster-3.home.arpa:
-          node_sans: "--tls-san pi-cluster-3.home.arpa --tls-san pi-cluster-3.local"
+        192.16.35.11:
     agent:
       hosts:
-        pi-cluster-4.home.arpa: {}
+        192.16.35.12:
+        192.16.35.13:
+
   # Required Vars
   vars:
-    k3s_version: v1.34.1+k3s1
-    token: "{{ k3s_cluster_token }}"
-    # HA API endpoint using internal DNS (round-robin across server nodes 1-3)
-    api_endpoint: "k3s-api.{{ dns_domain }}"
-
-    # TLS SANs for API server certificate
-    # Each server includes: its own hostname (via node_sans), HA endpoint, wildcard
-    extra_server_args: >-
-      {{ node_sans | default('') }}
-      --tls-san k3s-api.{{ dns_domain }}
-      --tls-san *.apps.{{ dns_domain }}
+    ansible_port: 22
+    ansible_user: debian
+    k3s_version: v1.31.12+k3s1
+    # The token should be a random string of reasonable length. You can generate
+    # one with the following commands:
+    # - openssl rand -base64 64
+    # - pwgen -s 64 1
+    # You can use ansible-vault to encrypt this value / keep it secret.
+    # Or you can omit it if not using Vagrant and let the first server automatically generate one.
+    token: "changeme!"
+    api_endpoint: "{{ hostvars[groups['server'][0]]['ansible_host'] | default(groups['server'][0]) }}"
 
     # Optional vars
+    # extra_server_args: ""
     # extra_agent_args: ""
+    # extra_install_envs: { 'INSTALL_K3S_SKIP_SELINUX_RPM': 'true' }
     # cluster_context: k3s-ansible
     # api_port: 6443
     # k3s_server_location: /var/lib/rancher/k3s

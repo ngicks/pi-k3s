@@ -36,3 +36,4 @@ Bash automation [LANGUAGE-SPECIFIC, ONLY FOR LANGUAGES IN USE] Ansible 2.16+, Ku
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
+- you are in restricted environment. You can't execute commands that need secret info.

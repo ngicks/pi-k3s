@@ -1,11 +1,10 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.1 → 1.1.0
+- Version change: 1.1.0 → 1.2.0
 - Modified principles: none
-- Added sections: none
+- Added sections: Serena Knowledge Stewardship (new Principle VI)
 - Removed sections: none
-- Modified sections: Development & Operations Workflow (added Serena knowledge stewardship clause), Governance (mandated Serena tooling compliance)
-- Templates requiring updates: .specify/templates/plan-template.md ✅ updated, .specify/templates/spec-template.md ✅ updated, .specify/templates/tasks-template.md ✅ updated
+- Templates requiring updates: .specify/templates/plan-template.md ✅ already aligned, .specify/templates/spec-template.md ✅ already aligned, .specify/templates/tasks-template.md ✅ updated
 - Follow-up TODOs: none
 -->
 # pi-k3s Constitution
@@ -47,6 +46,13 @@ Manual interventions are allowed only when backed by current documentation and a
 - Require governance reviews to cite the applicable runbook section and evidence artifacts before closing.
 **Rationale**: Consistent documentation keeps manual processes safe despite human-in-the-loop operations.
 
+### VI. Serena Knowledge Stewardship
+Every material change must synchronize operational knowledge through Serena MCP.
+- Capture decision logs, playbook diffs, and operator notes in `.specify/memory/` alongside links to `docs/governance/reviews/<date>-<change>/` on the same day the change lands.
+- Keep `.specify/templates/` synchronized with actual workflows so `/speckit.*` commands emit instructions that match reality; update templates in the same pull request as procedural changes.
+- Block reviews that lack a Serena knowledge diff or a citation showing why no template/memory updates were needed.
+**Rationale**: Treating Serena as part of the source of truth prevents knowledge drift between humans and automation.
+
 ## Operational Constraints & Stack Requirements
 
 pi-k3s operates a four-node Raspberry Pi 4 Model B (8GB RAM) cluster managed entirely from this repository. The automation stack MUST use Ansible 2.16+ with `community.general` and `kubernetes.core` collections executed from the uv-managed virtual environment. Kubernetes workloads run on k3s v1.29 (stable channel) with embedded etcd; manifests must target ARM64 compatibility and honor the documented directory structure (`automation/`, `cluster/`, `docs/`, `tests/`). Helm 3.x handles packaged components, and observability relies on kube-prometheus-stack plus Loki. All secrets, inventories, and kubeconfigs stored in the repository must remain SOPS-encrypted with age recipients maintained in `.sops.yaml`. Hardware limitations (ARM64, constrained IO, residential network) require operators to document performance deviations and mitigation in governance logs.
@@ -66,4 +72,4 @@ Work proceeds in deliberate increments that preserve auditability.
 
 The constitution supersedes conflicting project guidance. Amendments require maintainer consensus recorded in `docs/governance/reviews/constitution-log.md`, including summary, rationale, affected principles, and evidence of a compliance review. Versioning follows semantic rules: MAJOR for removing or redefining principles, MINOR for adding principles or expanding operational requirements, PATCH for clarifications that do not change obligations. Every pull request must include a Constitution Check noting how work satisfies each principle; reviewers MUST block merges lacking evidence. A quarterly governance review validates observability drills, secrets rotation, rebuild compliance, and documentation freshness; findings feed back into runbooks and future specs. Serena MCP must record constitution-aligned updates: operators log decisions and template changes via `.specify/memory/` so reviewers can audit knowledge stewardship alongside infrastructure evidence.
 
-**Version**: 1.1.0 | **Ratified**: 2025-11-03 | **Last Amended**: 2025-11-05
+**Version**: 1.2.0 | **Ratified**: 2025-11-03 | **Last Amended**: 2025-11-09
