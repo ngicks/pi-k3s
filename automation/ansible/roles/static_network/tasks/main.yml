@@ -35,6 +35,10 @@
     mode: "0600"
   register: netplan_template
 
+- name: netplan generate
+  ansible.builtin.command: netplan generate
+  become: yes
+
 - name: Record netplan change status
   ansible.builtin.set_fact:
     netplan_changed: "{{ (netplan_template is defined) and netplan_template.changed }}"
