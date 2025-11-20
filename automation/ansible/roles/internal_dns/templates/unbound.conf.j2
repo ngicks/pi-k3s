@@ -43,6 +43,10 @@ server:
     harden-dnssec-stripped: yes
     use-caps-for-id: yes
 
+    # DNSSEC: Allow unsigned responses from router while still validating when possible
+    # Router DNS doesn't provide DNSSEC-signed responses
+    val-permissive-mode: yes
+
     # Local data override for private zones
     private-domain: "{{ dns_domain }}"
     private-address: 192.168.0.0/16
@@ -57,4 +61,5 @@ server:
 # Forward queries for external domains to upstream DNS (router)
 forward-zone:
     name: "."
+    forward-first: yes
     forward-addr: {{ local_gateway }}
